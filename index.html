@@ -1,1105 +1,572 @@
 <!DOCTYPE html>
-<html lang="ko" class="h-full bg-slate-950 text-slate-100">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나이트시티 부랑아에서 엣지러너까지</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cp: {
-                            yellow: '#FCEE09',
-                            cyan: '#00f0ff',
-                            pink: '#ff0055',
-                            dark: '#0a0b10',
-                            panel: '#12141d',
-                            border: '#1f2438',
-                            red: '#ff2a2a'
-                        }
-                    },
-                    fontFamily: {
-                        mono: ['Courier New', 'Consolas', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
+    <title>CYBERPUNK: STREET RAT TO EDGERUNNER</title>
     <style>
-        /* Cyberpunk Visual Effects */
+        :root {
+            --neon-yellow: #fcee09;
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff0055;
+            --bg-dark: #0a0a0c;
+            --card-bg: #12131a;
+            --card-border: #2a2c3a;
+            --text-main: #e0e6ed;
+            --text-muted: #788a9c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            user-select: none;
+        }
+
         body {
-            background-color: #08090d;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
             background-image: 
-                radial-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 0),
-                radial-gradient(rgba(255, 0, 85, 0.03) 1px, transparent 0);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
+                radial-gradient(circle at 50% 50%, rgba(20, 20, 30, 0.8) 0%, rgba(10, 10, 12, 1) 100%),
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 20px 20px, 20px 20px;
         }
 
-        .scanline {
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.05);
+            padding: 25px;
             position: relative;
-            overflow: hidden;
-        }
-        .scanline::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 10;
-            background-size: 100% 3px, 6px 100%;
-            pointer-events: none;
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
         }
 
-        .neon-glow-yellow {
-            box-shadow: 0 0 10px rgba(252, 238, 9, 0.3), inset 0 0 5px rgba(252, 238, 9, 0.2);
-        }
-        .neon-glow-cyan {
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 5px rgba(0, 240, 255, 0.2);
-        }
-        .neon-glow-pink {
-            box-shadow: 0 0 10px rgba(255, 0, 85, 0.3), inset 0 0 5px rgba(255, 0, 85, 0.2);
-        }
-
-        .cyber-border {
-            border: 1px solid #00f0ff;
-            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-pink);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .cyber-button {
+        h1 {
+            color: var(--neon-yellow);
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px var(--neon-pink);
+        }
+
+        .audio-controls button {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .audio-controls button:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+        }
+
+        .stat-value.danger { color: var(--neon-pink); }
+        .stat-value.gold { color: var(--neon-yellow); }
+
+        .main-content {
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .story-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-left: 4px solid var(--neon-yellow);
+            margin-bottom: 20px;
+            min-height: 180px;
+            line-height: 1.6;
+        }
+
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice-btn {
+            background: #181a24;
+            border: 1px solid var(--neon-cyan);
+            color: #fff;
+            padding: 14px 18px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
             position: relative;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            transition: all 0.15s ease-in-out;
         }
 
-        /* Glitch text effect */
-        .glitch-text {
-            position: relative;
-            display: inline-block;
+        .choice-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            transform: translateX(5px);
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .intermission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
-        ::-webkit-scrollbar-track {
-            background: #0a0b10;
+
+        .shop-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--card-border);
+            padding: 15px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #00f0ff;
-            border-radius: 2px;
+
+        .shop-card h3 {
+            color: var(--neon-yellow);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 5px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff0055;
+
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
         }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid var(--neon-yellow);
+            color: var(--neon-yellow);
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .btn-small:hover {
+            background: var(--neon-yellow);
+            color: #000;
+        }
+
+        .btn-next {
+            width: 100%;
+            background: var(--neon-pink);
+            border: none;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            text-transform: uppercase;
+        }
+
+        .btn-next:hover {
+            background: #ff2a75;
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="h-full font-mono text-slate-200 antialiased scanline selection:bg-cp-yellow selection:text-black">
-    <div id="app" class="min-h-screen flex flex-col justify-between p-2 md:p-6 max-w-7xl mx-auto">
-        
-        <!-- HEADER / NAVIGATION HUD -->
-        <header class="border-b-2 border-cp-yellow bg-cp-dark/90 p-4 mb-4 flex flex-wrap justify-between items-center gap-4 rounded-t-lg shadow-lg">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-cp-yellow text-slate-950 font-black flex items-center justify-center text-xl rounded shadow-lg border border-white">
-                    NC
-                </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-black text-cp-yellow tracking-wider uppercase glitch-text">
-                        NIGHT CITY: EDGERUNNER
-                    </h1>
-                    <p class="text-xs text-cp-cyan tracking-widest uppercase">부랑아에서 전설의 엣지러너까지</p>
-                </div>
-            </div>
+<body>
 
-            <!-- Global Controls & Status -->
-            <div class="flex items-center space-x-3 text-xs">
-                <button id="sfx-toggle" onclick="game.toggleSFX()" class="px-3 py-1.5 border border-cp-cyan text-cp-cyan hover:bg-cp-cyan/20 transition rounded flex items-center gap-1">
-                    🔊 SFX: <span id="sfx-status">ON</span>
-                </button>
-                <button onclick="game.saveGame()" class="px-3 py-1.5 border border-emerald-500 text-emerald-400 hover:bg-emerald-500/20 transition rounded">
-                    💾 저장
-                </button>
-                <button onclick="game.resetGamePrompt()" class="px-3 py-1.5 border border-cp-pink text-cp-pink hover:bg-cp-pink/20 transition rounded">
-                    🔄 리셋
-                </button>
-            </div>
-        </header>
+<div class="container">
+    <header>
+        <h1>NIGHT CITY: EDGERUNNER</h1>
+        <div class="audio-controls">
+            <button id="bgmToggle">🔊 BGM: OFF</button>
+        </div>
+    </header>
 
-        <!-- MAIN APP CONTENT AREA -->
-        <!-- 1. CREATION SCREEN -->
-        <main id="screen-creation" class="flex-1 flex items-center justify-center py-6">
-            <div class="w-full max-w-xl bg-cp-panel border-2 border-cp-cyan p-6 md:p-8 rounded-lg shadow-2xl relative neon-glow-cyan">
-                <div class="absolute -top-3 left-6 bg-cp-cyan text-slate-950 font-bold text-xs px-3 py-0.5 tracking-wider uppercase">
-                    SYSTEM INITIALIZATION // USER CREATION
-                </div>
-
-                <h2 class="text-2xl font-bold text-cp-yellow mb-6 border-b border-slate-700 pb-2">신원 데이터 입력</h2>
-
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider text-cp-cyan mb-1">용병 이름 / 핸들 (Handle)</label>
-                        <input type="text" id="input-name" placeholder="V 또는 핸들을 입력하세요..." value="V" 
-                            class="w-full bg-slate-900 border border-slate-700 focus:border-cp-yellow focus:ring-1 focus:ring-cp-yellow px-4 py-2.5 rounded text-cp-yellow font-bold text-lg outline-none">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider text-cp-cyan mb-1">시작 클래스 / 라이프스타일</label>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="role-selector">
-                            <!-- Roles dynamically rendered -->
-                        </div>
-                    </div>
-
-                    <!-- Role Details View -->
-                    <div id="role-description" class="bg-slate-900/80 border border-slate-800 p-3 rounded text-xs text-slate-300">
-                        클래스를 선택하십시오.
-                    </div>
-
-                    <button onclick="game.createCharacter()" class="w-full py-3.5 bg-cp-yellow text-slate-950 font-black text-base tracking-widest uppercase hover:bg-yellow-300 active:scale-[0.99] transition shadow-lg rounded mt-4">
-                        나이트시티 접속 [START]
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- 2. GAME DASHBOARD SCREEN (Hidden by default) -->
-        <main id="screen-dashboard" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 py-2">
-            
-            <!-- LEFT PANEL: CHARACTER HUD & STATUS (4 Cols) -->
-            <section class="lg:col-span-4 space-y-4">
-                
-                <!-- Player Profile Card -->
-                <div class="bg-cp-panel border border-cp-cyan/50 p-4 rounded-lg relative neon-glow-cyan">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <span id="hud-rank" class="bg-cp-yellow text-slate-950 text-[10px] font-black px-2 py-0.5 rounded tracking-widest uppercase">
-                                STREETKID
-                            </span>
-                            <h2 id="hud-name" class="text-xl font-black text-slate-100 tracking-wide mt-1">V</h2>
-                            <p id="hud-role" class="text-xs text-cp-cyan">Solo (용병)</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] text-slate-400 block uppercase">자금 (Eddies)</span>
-                            <span id="hud-eddies" class="text-lg font-extrabold text-emerald-400">€$ 500</span>
-                        </div>
-                    </div>
-
-                    <!-- Stats Bar Group -->
-                    <div class="space-y-3 mt-4 text-xs">
-                        <!-- HP Bar -->
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-cp-red font-bold flex items-center gap-1">❤️ 체력 (HP)</span>
-                                <span id="hud-hp-text" class="text-slate-300">100 / 100</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
-                                <div id="hud-hp-bar" class="bg-cp-red h-full transition-all duration-300" style="width: 100%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Humanity / Cyberpsychosis Meter -->
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-cp-cyan font-bold flex items-center gap-1">🧠 인간성 (Humanity)</span>
-                                <span id="hud-humanity-text" class="text-slate-300">100%</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
-                                <div id="hud-humanity-bar" class="bg-cp-cyan h-full transition-all duration-300" style="width: 100%"></div>
-                            </div>
-                            <p id="hud-psychosis-warning" class="text-[10px] text-cp-pink mt-0.5 hidden animate-pulse font-bold">
-                                ⚠️ 사이버 사이코시스 위험군! 인간성 저하!
-                            </p>
-                        </div>
-
-                        <!-- Street Cred Progress -->
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-cp-yellow font-bold flex items-center gap-1">⭐ 평판 (Street Cred)</span>
-                                <span id="hud-cred-text" class="text-slate-300">Lv.1 (0/100)</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
-                                <div id="hud-cred-bar" class="bg-cp-yellow h-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Attributes Grid -->
-                    <div class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-5 gap-1 text-center">
-                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-800">
-                            <span class="block text-[9px] text-slate-400">반사</span>
-                            <span id="stat-reflexes" class="font-bold text-cp-yellow">3</span>
-                        </div>
-                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-800">
-                            <span class="block text-[9px] text-slate-400">신체</span>
-                            <span id="stat-body" class="font-bold text-cp-pink">3</span>
-                        </div>
-                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-800">
-                            <span class="block text-[9px] text-slate-400">지능</span>
-                            <span id="stat-intelligence" class="font-bold text-cp-cyan">3</span>
-                        </div>
-                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-800">
-                            <span class="block text-[9px] text-slate-400">테크</span>
-                            <span id="stat-technical" class="font-bold text-emerald-400">3</span>
-                        </div>
-                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-800">
-                            <span class="block text-[9px] text-slate-400">냉정</span>
-                            <span id="stat-cool" class="font-bold text-purple-400">3</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Active Equipped Cyberware & Gear Summary -->
-                <div class="bg-cp-panel border border-slate-800 p-4 rounded-lg">
-                    <h3 class="text-xs font-bold text-cp-cyan uppercase tracking-wider mb-2 flex justify-between items-center">
-                        <span>장착 사이버웨어 & 무기</span>
-                        <span id="hud-cyberware-count" class="text-[10px] text-slate-400">0/5</span>
-                    </h3>
-                    <div id="equipped-list" class="space-y-1.5 text-xs text-slate-300">
-                        <!-- Rendered dynamically -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- RIGHT PANEL: GAME ACTION HUBS & TERMINAL LOG (8 Cols) -->
-            <section class="lg:col-span-8 flex flex-col space-y-4">
-                
-                <!-- NAVIGATION TABS -->
-                <nav class="flex border-b border-slate-800 bg-cp-panel p-1 rounded-t-lg overflow-x-auto gap-1 text-xs font-bold">
-                    <button onclick="game.switchTab('gigs')" id="tab-gigs" class="tab-btn px-4 py-2 rounded text-cp-yellow border-b-2 border-cp-yellow bg-slate-900">
-                        🎯 의뢰 (Gigs)
-                    </button>
-                    <button onclick="game.switchTab('ripperdoc')" id="tab-ripperdoc" class="tab-btn px-4 py-2 rounded text-slate-400 hover:text-slate-200">
-                        🦾 리퍼닥 (Ripperdoc)
-                    </button>
-                    <button onclick="game.switchTab('blackmarket')" id="tab-blackmarket" class="tab-btn px-4 py-2 rounded text-slate-400 hover:text-slate-200">
-                        🛒 무기 / 암시장
-                    </button>
-                    <button onclick="game.switchTab('activities')" id="tab-activities" class="tab-btn px-4 py-2 rounded text-slate-400 hover:text-slate-200">
-                        🏠 휴식 & 활동
-                    </button>
-                    <button onclick="game.switchTab('halloffame')" id="tab-halloffame" class="tab-btn px-4 py-2 rounded text-slate-400 hover:text-slate-200">
-                        🏆 명예의 전당
-                    </button>
-                </nav>
-
-                <!-- TAB CONTENT CONTAINER -->
-                <div id="tab-content" class="bg-cp-panel border border-slate-800 p-4 rounded-b-lg flex-1 min-h-[340px] overflow-y-auto">
-                    <!-- Dynamic content will be injected here -->
-                </div>
-
-                <!-- SYSTEM TERMINAL / EVENT LOG -->
-                <div class="bg-slate-950 border border-slate-800 rounded-lg p-3 flex flex-col h-48">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-1 mb-2">
-                        <span class="text-[10px] text-cp-cyan font-bold tracking-widest uppercase flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                            NIGHT_CITY_NETLINK // EVENT LOG
-                        </span>
-                        <button onclick="game.clearLogs()" class="text-[10px] text-slate-500 hover:text-slate-300">로그 지우기</button>
-                    </div>
-                    <div id="terminal-log" class="flex-1 overflow-y-auto font-mono text-xs space-y-1.5 pr-2">
-                        <!-- Dynamic log items -->
-                    </div>
-                </div>
-
-            </section>
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="mt-6 border-t border-slate-800 pt-3 text-center text-[11px] text-slate-500 flex flex-wrap justify-between items-center gap-2">
-            <span>NIGHT CITY SIMULATOR v1.0.4 - STREETKID TO EDGERUNNER</span>
-            <span>"In Night City, you're either a legend or a corpse."</span>
-        </footer>
+    <!-- 캐릭터 스탯 표시줄 -->
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+            <span class="stat-label">진행 상황</span>
+            <span class="stat-value" id="dayDisplay">DAY 1 (CHAPTER 1)</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">인간성 (HUMANITY)</span>
+            <span class="stat-value" id="humanityDisplay">100%</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">에디 (CREDITS)</span>
+            <span class="stat-value gold" id="moneyDisplay">€$ 500</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">평판 (STREET CRED)</span>
+            <span class="stat-value" id="credDisplay">LV.1 (부랑아)</span>
+        </div>
     </div>
 
-    <!-- AUDIO SYSTEM & GAME ENGINE JAVASCRIPT -->
-    <script>
-        /**
-         * Web Audio Synthesizer for Retro Cyberpunk SFX
-         */
-        class SoundSystem {
-            constructor() {
-                this.ctx = null;
-                this.enabled = true;
-            }
+    <!-- 메인 컨텐츠 영역 -->
+    <div class="main-content">
+        <!-- 스토리 & 선택지 화면 -->
+        <div id="storyView">
+            <div class="story-box" id="storyText">
+                스토리 텍스트 로딩 중...
+            </div>
+            <div class="choices-container" id="choicesBox">
+                <!-- 선택지 버튼이 동적으로 생성됨 -->
+            </div>
+        </div>
 
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        <!-- 선택 결과 화면 -->
+        <div id="resultView" class="hidden">
+            <div class="story-box" style="border-left-color: var(--neon-pink);">
+                <h3 style="color: var(--neon-pink); margin-bottom: 10px;">[ 사건 처리 결과 ]</h3>
+                <p id="resultText"></p>
+                <div id="resultChanges" style="margin-top: 15px; color: var(--neon-cyan); font-weight: bold;"></div>
+            </div>
+            <button class="btn-next" onclick="nextDay()">다음 날로 진행 ▶</button>
+        </div>
+
+        <!-- 챕터 인터미션 (정비 화면) -->
+        <div id="intermissionView" class="hidden">
+            <div class="story-box" style="border-left-color: var(--neon-cyan);">
+                <h2 style="color: var(--neon-cyan);">CHAPTER COMPLETE</h2>
+                <p>CHAPTER 정비 타임입니다. 리퍼닥 시술을 받거나 무기 암시장에서 장비를 정비하세요.</p>
+            </div>
+
+            <div class="intermission-grid">
+                <!-- 리퍼닥 -->
+                <div class="shop-card">
+                    <h3>🔧 리퍼닥 (RIPPERDOC)</h3>
+                    <div class="shop-item">
+                        <div>
+                            <div>피하 장갑 (신체+2)</div>
+                            <small style="color:var(--text-muted)">인간성 -10%</small>
+                        </div>
+                        <button class="btn-small" onclick="buyImplant('armor', 1000, 10, '신체', 2)">€$ 1,000</button>
+                    </div>
+                    <div class="shop-item">
+                        <div>
+                            <div>산데비스탄 (반사+3)</div>
+                            <small style="color:var(--text-muted)">인간성 -20%</small>
+                        </div>
+                        <button class="btn-small" onclick="buyImplant('sande', 2500, 20, '반사신경', 3)">€$ 2,500</button>
+                    </div>
+                </div>
+
+                <!-- 암시장 -->
+                <div class="shop-card">
+                    <h3>🔫 무기 암시장</h3>
+                    <div class="shop-item">
+                        <div>
+                            <div>스마트 피스톨</div>
+                            <small style="color:var(--text-muted)">성공률 보정 +15%</small>
+                        </div>
+                        <button class="btn-small" onclick="buyWeapon('pistol', 800)">€$ 800</button>
+                    </div>
+                    <div class="shop-item">
+                        <div>
+                            <div>체력 회복제 (Bounce Back)</div>
+                            <small style="color:var(--text-muted)">인간성 +5% 회복</small>
+                        </div>
+                        <button class="btn-small" onclick="buyHeal(300)">€$ 300</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-next" onclick="startNextChapter()">다음 챕터 시작 ▶</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 게임 상태 관리 ---
+    let state = {
+        day: 1,
+        chapter: 1,
+        humanity: 100,
+        money: 500,
+        cred: 1,
+        stats: { body: 5, reflex: 5, tech: 5 },
+        inventory: []
+    };
+
+    // --- 스토리 데이터 ---
+    const storyData = [
+        // DAY 1
+        {
+            day: 1,
+            text: "나이트시티 왓슨의 어두운 골목길. 오늘따라 비가 내리고 네온 간판이 핏빛으로 번진다. 픽서 레지나 존스로부터 첫 연락이 왔다. '헤이 킷, 타이거 클로 녀석들이 무단 점거한 넷카페에서 데이터 칩을 하나 빼와라.'",
+            choices: [
+                {
+                    text: "[신체/정면돌파] 정문으로 당당하게 들어가 녀석들을 털어버린다.",
+                    result: "권총을 뽑아들고 정문으로 진입했다! 난사전 끝에 녀석들을 제압하고 칩을 확보했지만 약간의 총상을 입었다.",
+                    changes: { money: 400, cred: 1, humanity: -2 }
+                },
+                {
+                    text: "[기술/해킹] 환기구를 통해 은밀히 침투하여 데이터만 복사한다.",
+                    result: "보안 시스템을 우회하여 아무도 모르게 칩 데이터만 정교하게 복사해 빠져나왔다. 레지나가 깔끔하다며 팁을 얹어주었다.",
+                    changes: { money: 600, cred: 1, humanity: 0 }
                 }
-            }
+            ]
+        },
+        // DAY 2
+        {
+            day: 2,
+            text: "스캐빈저들이 가든뷰 아파트 근처에서 지나가던 용병을 습격해 장비를 도륙하고 있다는 소식이 들린다. 당신은 현장 근처에 있다.",
+            choices: [
+                {
+                    text: "[전투] 스캐빈저들을 소탕하고 생존자를 구출한다.",
+                    result: "스캐빈저 무리를 쓸어버렸다. 목숨을 건진 용병이 고마워하며 가진 에디와 고급 무기 부품을 넘겨주었다.",
+                    changes: { money: 700, cred: 2, humanity: -3 }
+                },
+                {
+                    text: "[방관] 시끄러운 일에 휘말리지 않고 남겨진 부품만 슬쩍 챙긴다.",
+                    result: "싸움이 끝난 후 남겨진 시체에서 챙길 만한 에디와 사이버웨어 부품을 털어 챙겼다. 차가운 나이트시티의 방식이다.",
+                    changes: { money: 350, cred: 0, humanity: -5 }
+                }
+            ]
+        },
+        // DAY 3
+        {
+            day: 3,
+            text: "메가빌딩 H10 엘리베이터 안, 아라사카 경비원 하나가 피를 흘리며 넘어져 있다. 그의 품에 기밀 암호화 드라이브가 보인다.",
+            choices: [
+                {
+                    text: "[암시장] 드라이브를 빼돌려 암시장에 팔아넘긴다.",
+                    result: "드라이브를 피노체 암시장에 넘겨 거액의 에디를 손에 쥐었다. 하지만 아라사카의 추적 레이더에 오를지도 모른다.",
+                    changes: { money: 1200, cred: 1, humanity: -5 }
+                },
+                {
+                    text: "[구조] 경비원을 치료하고 아라사카 쪽에 안전하게 인계한다.",
+                    result: "경비원을 살려주고 인계했다. 아라사카 간부가 직접 고마움을 표하며 깔끔한 보상금을 전송했다.",
+                    changes: { money: 800, cred: 2, humanity: 2 }
+                }
+            ]
+        }
+    ];
 
-            playBeep(freq = 440, type = 'sine', duration = 0.1) {
-                if (!this.enabled) return;
-                this.init();
-                try {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + duration);
-                } catch (e) {}
-            }
+    // --- 웹 오디오 BGM 엔진 ---
+    let audioCtx = null;
+    let isPlaying = false;
+    let bgmInterval = null;
 
-            playSuccess() {
-                if (!this.enabled) return;
-                this.playBeep(523.25, 'triangle', 0.08); // C5
-                setTimeout(() => this.playBeep(659.25, 'triangle', 0.12), 80); // E5
-            }
+    function toggleBGM() {
+        const btn = document.getElementById('bgmToggle');
+        if (!isPlaying) {
+            startSynthBGM();
+            btn.innerText = "🔊 BGM: ON";
+            btn.style.color = "var(--neon-yellow)";
+            btn.style.borderColor = "var(--neon-yellow)";
+            isPlaying = true;
+        } else {
+            stopSynthBGM();
+            btn.innerText = "🔇 BGM: OFF";
+            btn.style.color = "var(--neon-cyan)";
+            btn.style.borderColor = "var(--neon-cyan)";
+            isPlaying = false;
+        }
+    }
 
-            playFail() {
-                if (!this.enabled) return;
-                this.playBeep(220, 'sawtooth', 0.15);
-                setTimeout(() => this.playBeep(180, 'sawtooth', 0.2), 120);
-            }
-
-            playCyber() {
-                if (!this.enabled) return;
-                this.playBeep(800, 'square', 0.05);
-                setTimeout(() => this.playBeep(1200, 'square', 0.08), 50);
-            }
+    function startSynthBGM() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
 
-        const sound = new SoundSystem();
-
-        /**
-         * Game Data Definitions
-         */
-        const ROLES = {
-            solo: {
-                id: 'solo',
-                name: '용병 (Solo)',
-                desc: '강인한 신체와 총기 기술로 정면 돌파에 능한 전투 전문가입니다.',
-                stats: { reflexes: 5, body: 5, intelligence: 2, technical: 2, cool: 3 }
-            },
-            netrunner: {
-                id: 'netrunner',
-                name: '넷러너 (Netrunner)',
-                desc: '사이버덱을 이용해 적의 시스템을 해킹하고 보안망을 침투하는 전뇌 해커입니다.',
-                stats: { reflexes: 2, body: 2, intelligence: 6, technical: 4, cool: 3 }
-            },
-            tech: {
-                id: 'tech',
-                name: '테크니션 (Tech)',
-                desc: '기계와 장비 개조에 유능하며, 첨단 무기 제작 및 해체 능력이 탁월합니다.',
-                stats: { reflexes: 3, body: 3, intelligence: 3, technical: 6, cool: 2 }
-            }
-        };
-
-        const RANKS = [
-            { cred: 0, title: '부랑아 (Streetkid)' },
-            { cred: 100, title: '초짜 용병 (Novice Merc)' },
-            { cred: 300, title: '나이트시티 베테랑 (Veteran Merc)' },
-            { cred: 700, title: '엣지러너 (Edgerunner)' },
-            { cred: 1500, title: '애프터라이프 전설 (Afterlife Legend)' }
-        ];
-
-        const FIXERS = {
-            regina: { name: '레지나 존스', district: '왓슨 (Watson)' },
-            wakako: { name: '와카코 오카다', district: '웨스트브룩 (Westbrook)' },
-            rogue: { name: '로그 아멘디아레스', district: '애프터라이프 (Afterlife)' }
-        };
-
-        const GIGS = [
-            // Tier 1 (Low level)
-            {
-                id: 'gig_scav_bust',
-                title: '스캐빈저 은신처 소탕',
-                fixer: 'regina',
-                minCred: 0,
-                difficulty: '쉬움',
-                costEnergy: 10,
-                payout: 250,
-                credGain: 25,
-                statCheck: { type: 'body', val: 3, name: '신체' },
-                desc: '왓슨의 폐건물에 둥지를 튼 스캐빈저들이 장기를 추출하고 있습니다. 소탕하고 신체 부품을 회수하십시오.'
-            },
-            {
-                id: 'gig_hack_data',
-                title: '기업 데이터 스틸',
-                fixer: 'regina',
-                minCred: 0,
-                difficulty: '쉬움',
-                costEnergy: 10,
-                payout: 300,
-                credGain: 30,
-                statCheck: { type: 'intelligence', val: 3, name: '지능' },
-                desc: '메일스트롬 서버실에 침투하여 내부 거래 장부를 해킹해 빼돌리십시오.'
-            },
-            // Tier 2
-            {
-                id: 'gig_tiger_claw',
-                title: '타이거 클로 카지노 습격',
-                fixer: 'wakako',
-                minCred: 80,
-                difficulty: '보통',
-                costEnergy: 15,
-                payout: 650,
-                credGain: 60,
-                statCheck: { type: 'reflexes', val: 5, name: '반사신경' },
-                desc: '웨스트브룩의 타이거 클로 비밀 카지노에서 장부를 탈취하고 현금을 확보하십시오.'
-            },
-            {
-                id: 'gig_tech_heist',
-                title: '밀리테크 수송선 도두둑',
-                fixer: 'wakako',
-                minCred: 150,
-                difficulty: '보통',
-                costEnergy: 15,
-                payout: 900,
-                credGain: 80,
-                statCheck: { type: 'technical', val: 5, name: '테크' },
-                desc: '밀리테크 수송 차량을 해킹하여 최신형 무기 프로토타입을 탈취하십시오.'
-            },
-            // Tier 3
-            {
-                id: 'gig_arasaka_tower',
-                title: '아라사카 연구소 스파이 작전',
-                fixer: 'rogue',
-                minCred: 350,
-                difficulty: '어려움',
-                costEnergy: 25,
-                payout: 2200,
-                credGain: 180,
-                statCheck: { type: 'cool', val: 7, name: '냉정' },
-                desc: '아라사카 보안을 뚫고 내부 프로토타입 데이터를 복사해 오는 최고 난이도 침투 작전입니다.'
-            },
-            {
-                id: 'gig_final_heist',
-                title: '[대형 의뢰] 애프터라이프 궁극의 습격',
-                fixer: 'rogue',
-                minCred: 700,
-                difficulty: '최상',
-                costEnergy: 40,
-                payout: 8000,
-                credGain: 500,
-                statCheck: { type: 'reflexes', val: 9, name: '반사신경' },
-                desc: '나이트시티 전역을 흔들 대형 습격. 성공하면 당신은 애프터라이프의 전설이 됩니다.'
-            }
-        ];
-
-        const RIPPERDOC_SHOP = [
-            {
-                id: 'cyb_mantis',
-                name: '맨티스 블레이드',
-                type: '팔 사이버웨어',
-                price: 1200,
-                humanityCost: 15,
-                bonusStat: { type: 'reflexes', val: 3 },
-                desc: '팔 팔뚝에서 튀어나오는 날카로운 플라스마 칼날. 반사신경 +3'
-            },
-            {
-                id: 'cyb_sandy',
-                name: '산데비스탄 Mk.3',
-                type: '운영체제',
-                price: 2500,
-                humanityCost: 20,
-                bonusStat: { type: 'reflexes', val: 4 },
-                desc: '반응 속도를 극단적으로 상승시켜 주변 시간을 느리게 만듭니다. 반사신경 +4'
-            },
-            {
-                id: 'cyb_deck',
-                name: '신원 미상 사이버덱',
-                type: '운영체제',
-                price: 1800,
-                humanityCost: 12,
-                bonusStat: { type: 'intelligence', val: 3 },
-                desc: '고성능 퀵핵 프로그램을 탑재할 수 있는 사이버덱. 지능 +3'
-            },
-            {
-                id: 'cyb_armor',
-                name: '피하 장갑 (Subdermal Armor)',
-                type: '신체 개조',
-                price: 1000,
-                humanityCost: 10,
-                bonusStat: { type: 'body', val: 2 },
-                desc: '피부 아래 장갑판을 이식하여 방어력을 대폭 강화합니다. 신체 +2'
-            },
-            {
-                id: 'cyb_kiroshi',
-                name: '키로시 안구 Mk.3',
-                type: '시각 개조',
-                price: 800,
-                humanityCost: 5,
-                bonusStat: { type: 'cool', val: 2 },
-                desc: '적의 약점과 조준선을 실시간 계산하는 최첨단 안구 센서. 냉정 +2'
-            }
-        ];
-
-        const BLACKMARKET_SHOP = [
-            {
-                id: 'wpn_pistol',
-                name: '유니티 파워 피스톨',
-                type: '무기',
-                price: 400,
-                bonusStat: { type: 'reflexes', val: 1 },
-                desc: '신뢰성 높은 신체 피스톨. 반사신경 +1'
-            },
-            {
-                id: 'wpn_smart_rifle',
-                name: '지능형 스마트 소총',
-                type: '무기',
-                price: 1500,
-                bonusStat: { type: 'intelligence', val: 2 },
-                desc: '유도 탄환이 자동으로 적의 약점을 타격합니다. 지능 +2'
-            },
-            {
-                id: 'wpn_shotgun',
-                name: 'Carnage 테크 샷건',
-                type: '무기',
-                price: 1200,
-                bonusStat: { type: 'body', val: 2 },
-                desc: '엄폐물을 뚫어버리는 파괴적인 중장비 샷건. 신체 +2'
-            },
-            {
-                id: 'itm_maxdoc',
-                name: 'MaxDoc 응급 치료 주사기 x3',
-                type: '소모품',
-                price: 300,
-                isConsumable: true,
-                healAmount: 50,
-                desc: '체력을 즉시 50 회복합니다.'
-            }
-        ];
-
-        /**
-         * Main Game Controller Engine
-         */
-        class CyberpunkGame {
-            constructor() {
-                this.state = {
-                    name: 'V',
-                    role: 'solo',
-                    eddies: 500,
-                    cred: 0,
-                    hp: 100,
-                    maxHp: 100,
-                    humanity: 100,
-                    stats: { reflexes: 3, body: 3, intelligence: 3, technical: 3, cool: 3 },
-                    cyberware: [],
-                    inventory: [],
-                    completedGigs: [],
-                    currentTab: 'gigs'
-                };
-
-                this.selectedRole = 'solo';
-            }
-
-            init() {
-                this.renderRoleSelector();
-                this.loadGame();
-                this.updateUI();
-            }
-
-            toggleSFX() {
-                sound.enabled = !sound.enabled;
-                document.getElementById('sfx-status').innerText = sound.enabled ? 'ON' : 'OFF';
-                if (sound.enabled) sound.playBeep(600, 'sine', 0.1);
-            }
-
-            renderRoleSelector() {
-                const container = document.getElementById('role-selector');
-                container.innerHTML = Object.keys(ROLES).map(key => {
-                    const r = ROLES[key];
-                    const isSelected = this.selectedRole === key;
-                    return `
-                        <button type="button" onclick="game.selectRole('${key}')" 
-                            class="p-3 border text-left rounded transition ${isSelected ? 'border-cp-yellow bg-cp-yellow/10 text-cp-yellow font-bold' : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-500'}">
-                            <div class="text-sm font-bold">${r.name}</div>
-                        </button>
-                    `;
-                }).join('');
-
-                const descBox = document.getElementById('role-description');
-                const curRole = ROLES[this.selectedRole];
-                descBox.innerHTML = `
-                    <p class="font-bold text-cp-yellow mb-1">${curRole.name}</p>
-                    <p class="mb-2">${curRole.desc}</p>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-center text-slate-300 border-t border-slate-800 pt-1.5">
-                        <div>반사신경: ${curRole.stats.reflexes}</div>
-                        <div>신체: ${curRole.stats.body}</div>
-                        <div>지능: ${curRole.stats.intelligence}</div>
-                        <div>테크: ${curRole.stats.technical}</div>
-                        <div>냉정: ${curRole.stats.cool}</div>
-                    </div>
-                `;
-            }
-
-            selectRole(roleKey) {
-                sound.playBeep(500, 'sine', 0.05);
-                this.selectedRole = roleKey;
-                this.renderRoleSelector();
-            }
-
-            createCharacter() {
-                const nameInput = document.getElementById('input-name').value.trim();
-                if (!nameInput) return alert('용병 이름을 입력하세요!');
-
-                const roleData = ROLES[this.selectedRole];
-                this.state.name = nameInput;
-                this.state.role = this.selectedRole;
-                this.state.stats = { ...roleData.stats };
-
-                sound.playSuccess();
-                this.log(`[시스템] 용병 데이터베이스 등록 완료: <span class="text-cp-yellow font-bold">${nameInput}</span> (${roleData.name})`);
-                this.log(`[안내] 나이트시티에 오신 것을 환영합니다. 먼저 리퍼닥을 방문하거나 하위 의뢰를 수주하세요.`);
-
-                document.getElementById('screen-creation').classList.add('hidden');
-                document.getElementById('screen-dashboard').classList.remove('hidden');
-
-                this.switchTab('gigs');
-                this.updateUI();
-                this.saveGame();
-            }
-
-            switchTab(tabId) {
-                sound.playBeep(700, 'sine', 0.03);
-                this.state.currentTab = tabId;
-
-                // Update tab buttons
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    btn.className = 'tab-btn px-4 py-2 rounded text-slate-400 hover:text-slate-200';
-                });
-                const activeBtn = document.getElementById(`tab-${tabId}`);
-                if (activeBtn) {
-                    activeBtn.className = 'tab-btn px-4 py-2 rounded text-cp-yellow border-b-2 border-cp-yellow bg-slate-900 font-bold';
-                }
-
-                this.renderTabContent(tabId);
-            }
-
-            renderTabContent(tabId) {
-                const container = document.getElementById('tab-content');
-
-                if (tabId === 'gigs') {
-                    container.innerHTML = `
-                        <h3 class="text-sm font-bold text-cp-yellow mb-3 uppercase tracking-wider flex justify-between items-center">
-                            <span>픽서 작업 목록 (Gigs)</span>
-                            <span class="text-xs text-slate-400">성공률은 능력치에 영향받음</span>
-                        </h3>
-                        <div class="space-y-3">
-                            ${GIGS.map(gig => this.renderGigCard(gig)).join('')}
-                        </div>
-                    `;
-                } else if (tabId === 'ripperdoc') {
-                    container.innerHTML = `
-                        <div class="mb-3 border-b border-slate-800 pb-2">
-                            <h3 class="text-sm font-bold text-cp-cyan uppercase tracking-wider">빅터의 리퍼닥 클리닉</h3>
-                            <p class="text-xs text-slate-400">사이버웨어를 이식하면 능력치가 크게 상승하지만 인간성이 감소합니다.</p>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            ${RIPPERDOC_SHOP.map(item => this.renderRipperItem(item)).join('')}
-                        </div>
-                    `;
-                } else if (tabId === 'blackmarket') {
-                    container.innerHTML = `
-                        <div class="mb-3 border-b border-slate-800 pb-2">
-                            <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">암시장 및 무기 상인</h3>
-                            <p class="text-xs text-slate-400">무기와 소모품을 구매하여 전력을 강화하십시오.</p>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            ${BLACKMARKET_SHOP.map(item => this.renderMarketItem(item)).join('')}
-                        </div>
-                    `;
-                } else if (tabId === 'activities') {
-                    container.innerHTML = `
-                        <h3 class="text-sm font-bold text-cp-yellow mb-3 uppercase tracking-wider">휴식 및 개인 활동</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="bg-slate-900 border border-slate-800 p-4 rounded hover:border-cp-cyan transition">
-                                <h4 class="font-bold text-cp-cyan mb-1">🏠 아파트에서 휴식</h4>
-                                <p class="text-xs text-slate-400 mb-3">체력을 100% 회복하고 정신 스트레스를 완화합니다.</p>
-                                <button onclick="game.doRest()" class="w-full py-2 bg-cp-cyan/20 border border-cp-cyan text-cp-cyan hover:bg-cp-cyan/40 text-xs font-bold rounded">
-                                    휴식 취하기 (체력 완쾌)
-                                </button>
-                            </div>
-                            <div class="bg-slate-900 border border-slate-800 p-4 rounded hover:border-cp-yellow transition">
-                                <h4 class="font-bold text-cp-yellow mb-1">🏋️ 체력 단련 및 사격장</h4>
-                                <p class="text-xs text-slate-400 mb-3">€$ 200를 지불하여 원하는 능력치를 +1 단련합니다.</p>
-                                <div class="grid grid-cols-3 gap-1">
-                                    <button onclick="game.trainStat('reflexes')" class="py-1 bg-slate-800 border border-slate-700 hover:border-cp-yellow text-[10px] rounded">반사신경+</button>
-                                    <button onclick="game.trainStat('body')" class="py-1 bg-slate-800 border border-slate-700 hover:border-cp-yellow text-[10px] rounded">신체+</button>
-                                    <button onclick="game.trainStat('intelligence')" class="py-1 bg-slate-800 border border-slate-700 hover:border-cp-yellow text-[10px] rounded">지능+</button>
-                                    <button onclick="game.trainStat('technical')" class="py-1 bg-slate-800 border border-slate-700 hover:border-cp-yellow text-[10px] rounded">테크+</button>
-                                    <button onclick="game.trainStat('cool')" class="py-1 bg-slate-800 border border-slate-700 hover:border-cp-yellow text-[10px] rounded">냉정+</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else if (tabId === 'halloffame') {
-                    const currentRankObj = this.getCurrentRank();
-                    container.innerHTML = `
-                        <h3 class="text-sm font-bold text-cp-yellow mb-2 uppercase tracking-wider">나이트시티 명예의 전당</h3>
-                        <p class="text-xs text-slate-400 mb-4">당신의 평판(Street Cred)에 따라 나이트시티에서의 신분이 결정됩니다.</p>
-                        <div class="space-y-2">
-                            ${RANKS.map(r => {
-                                const achieved = this.state.cred >= r.cred;
-                                return `
-                                    <div class="p-3 border rounded flex justify-between items-center ${achieved ? 'bg-cp-yellow/10 border-cp-yellow text-cp-yellow' : 'bg-slate-900/50 border-slate-800 text-slate-500'}">
-                                        <div>
-                                            <span class="text-xs font-bold block">${r.title}</span>
-                                            <span class="text-[10px]">필요 평판: ${r.cred} CRED</span>
-                                        </div>
-                                        <span class="text-xs font-black uppercase">${achieved ? '✅ 달성' : '🔒 잠김'}</span>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    `;
-                }
-            }
-
-            renderGigCard(gig) {
-                const fixer = FIXERS[gig.fixer];
-                const isCredUnlocked = this.state.cred >= gig.minCred;
-                const playerStatVal = this.state.stats[gig.statCheck.type] || 0;
-                
-                // Calculate success rate based on stat check
-                let successChance = Math.min(95, Math.max(15, 50 + (playerStatVal - gig.statCheck.val) * 15));
-
-                return `
-                    <div class="bg-slate-900 border ${isCredUnlocked ? 'border-slate-700 hover:border-cp-yellow' : 'border-slate-800 opacity-60'} p-3.5 rounded transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <h4 class="font-bold text-sm ${isCredUnlocked ? 'text-slate-100' : 'text-slate-500'}">${gig.title}</h4>
-                                    <span class="text-[10px] px-1.5 py-0.2 bg-slate-800 border border-slate-700 text-cp-cyan rounded">${gig.difficulty}</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">${gig.desc}</p>
-                            </div>
-                            <div class="text-right flex-shrink-0 ml-2">
-                                <span class="text-xs font-bold text-emerald-400 block">+€$ ${gig.payout}</span>
-                                <span class="text-[10px] text-cp-yellow block">+${gig.credGain} CRED</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
-                            <div class="text-[11px] text-slate-400">
-                                픽서: <span class="text-slate-200">${fixer.name} (${fixer.district})</span> | 
-                                요구 판정: <span class="text-cp-cyan">${gig.statCheck.name} (${playerStatVal}/${gig.statCheck.val})</span>
-                            </div>
-                            ${isCredUnlocked ? `
-                                <button onclick="game.executeGig('${gig.id}')" class="px-3 py-1.5 bg-cp-yellow/20 border border-cp-yellow text-cp-yellow hover:bg-cp-yellow hover:text-slate-950 font-bold rounded text-xs transition">
-                                    의뢰 수행 (성공률 ${successChance}%)
-                                </button>
-                            ` : `
-                                <span class="text-[10px] text-cp-pink">🔒 평판 부족 (${gig.minCred} CRED 필요)</span>
-                            `}
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderRipperItem(item) {
-                const isBought = this.state.cyberware.some(c => c.id === item.id);
-
-                return `
-                    <div class="bg-slate-900 border ${isBought ? 'border-emerald-500/50' : 'border-slate-800'} p-3 rounded flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-1">
-                                <h4 class="font-bold text-xs text-cp-cyan">${item.name}</h4>
-                                <span class="text-xs font-bold text-emerald-400">€$ ${item.price}</span>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mb-2">${item.desc}</p>
-                            <div class="text-[10px] text-cp-pink mb-2">🧠 인간성 소모: -${item.humanityCost}%</div>
-                        </div>
-                        ${isBought ? `
-                            <button disabled class="w-full py-1.5 bg-emerald-950 border border-emerald-600 text-emerald-400 text-xs font-bold rounded">
-                                ✓ 장착됨
-                            </button>
-                        ` : `
-                            <button onclick="game.buyCyberware('${item.id}')" class="w-full py-1.5 bg-cp-cyan/20 border border-cp-cyan text-cp-cyan hover:bg-cp-cyan hover:text-slate-950 text-xs font-bold rounded transition">
-                                이식받기
-                            </button>
-                        `}
-                    </div>
-                `;
-            }
-
-            renderMarketItem(item) {
-                const isBought = this.state.inventory.some(i => i.id === item.id);
-
-                return `
-                    <div class="bg-slate-900 border ${isBought && !item.isConsumable ? 'border-emerald-500/50' : 'border-slate-800'} p-3 rounded flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-1">
-                                <h4 class="font-bold text-xs text-slate-200">${item.name}</h4>
-                                <span class="text-xs font-bold text-emerald-400">€$ ${item.price}</span>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mb-2">${item.desc}</p>
-                        </div>
-                        ${isBought && !item.isConsumable ? `
-                            <button disabled class="w-full py-1.5 bg-slate-800 text-slate-500 text-xs font-bold rounded">
-                                보유 중
-                            </button>
-                        ` : `
-                            <button onclick="game.buyMarketItem('${item.id}')" class="w-full py-1.5 bg-emerald-500/20 border border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 text-xs font-bold rounded transition">
-                                구매하기
-                            </button>
-                        `}
-                    </div>
-                `;
-            }
-
-            executeGig(gigId) {
-                const gig = GIGS.find(g => g.id === gigId);
-                if (!gig) return;
-
-                if (this.state.hp <= 20) {
-                    sound.playFail();
-                    return this.log(`<span class="text-cp-pink">⚠️ 체력이 너무 낮습니다! 먼저 휴식을 취하십시오.</span>`);
-                }
-
-                const playerStatVal = this.state.stats[gig.statCheck.type] || 0;
-                let successChance = Math.min(95, Math.max(15, 50 + (playerStatVal - gig.statCheck.val) * 15));
-                const roll = Math.random() * 100;
-
-                if (roll <= successChance) {
-                    // SUCCESS
-                    sound.playSuccess();
-                    this.state.eddies += gig.payout;
-                    this.state.cred += gig.credGain;
-                    
-                    // Minor HP loss in combat
-                    const hpLoss = Math.floor(Math.random() * 10) + 5;
-                    this.state.hp = Math.max(1, this.state.hp - hpLoss);
-
-                    this.log(`✅ <span class="text-emerald-400 font-bold">[의뢰 성공]</span> ${gig.title} 완료! (+€$ ${gig.payout}, +${gig.credGain} CRED)`);
-
-                    // Check for final heist victory
-                    if (gig.id === 'gig_final_heist') {
-                        this.log(`🏆 <span class="text-cp-yellow font-bold animate-pulse">[최종 승리] 당신은 나이트시티의 전설적인 엣지러너가 되었습니다! 애프터라이프에 당신의 이름을 딴 칵테일이 메뉴에 추가됩니다!</span>`);
-                    }
-                } else {
-                    // FAIL
-                    sound.playFail();
-                    const damage = Math.floor(Math.random() * 25) + 20;
-                    this.state.hp = Math.max(1, this.state.hp - damage);
-
-                    this.log(`❌ <span class="text-cp-pink font-bold">[의뢰 실패]</span> 작전 도중 가드에게 발각되었습니다! (-${damage} HP)`);
-                }
-
-                this.triggerRandomEvent();
-                this.updateUI();
-                this.renderTabContent('gigs');
-                this.saveGame();
-            }
-
-            buyCyberware(cyberId) {
-                const item = RIPPERDOC_SHOP.find(c => c.id === cyberId);
-                if (!item) return;
-
-                if (this.state.eddies < item.price) {
-                    sound.playFail();
-                    return this.log(`<span class="text-cp-pink">❌ Eddies가 부족합니다!</span>`);
-                }
-
-                this.state.eddies -= item.price;
-                this.state.humanity = Math.max(0, this.state.humanity - item.humanityCost);
-                this.state.stats[item.bonusStat.type] += item.bonusStat.val;
-                this.state.cyberware.push(item);
-
-                sound.playCyber();
-                this.log(`🦾 <span class="text-cp-cyan font-bold">[리퍼닥 시술]</span> ${item.name} 이식 완료! (${item.bonusStat.type.toUpperCase()} +${item.bonusStat.val}, 인간성 -${item.humanityCost}%)`);
-
-                // Cyberpsychosis Check
-                if (this.state.humanity <= 20) {
-                    this.log(`⚠️ <span class="text-cp-pink font-bold animate-ping">[사이버 사이코시스 경고] 인간성이 위험 수준입니다! 환각과 환청이 시작됩니다.</span>`);
-                }
-
-                this.updateUI();
-                this.renderTabContent('ripperdoc');
-                this.saveGame();
-            }
-
-            buyMarketItem(itemId) {
-                const item = BLACKMARKET_SHOP.find(i => i.id === itemId);
-                if (!item) return;
-
-                if (this.state.eddies < item.price) {
-                    sound.playFail();
-                    return this.log(`<span class="text-cp-pink">❌ Eddies가 부족합니다!</span>`);
-                }
-
-                this.state.eddies -= item.price;
-
-                if (item.isConsumable) {
-                    this.state.hp = Math.min(this.state.maxHp, this.state.hp + item.healAmount);
-                    sound.playSuccess();
-                    this.log(`💊 <span class="text-emerald-400 font-bold">[아이템 사용]</span> MaxDoc 사용으로 체력 +${item.healAmount} 회복!`);
-                } else {
-                    this.state.inventory.push(item);
-                    if (item.bonusStat) {
-                        this.state.stats[item.bonusStat.type] += item.bonusStat.val;
-                    }
-                    sound.playSuccess();
-                    this.log(`🛒 <span class="text-emerald-400 font-bold">[구매 완료]</span> ${item.name} 구매!`);
-                }
-
-                this.updateUI();
-                this.renderTabContent('blackmarket');
-                this.saveGame();
-            }
-
-            doRest() {
-                sound.playSuccess();
-                this.state.hp = this.state.maxHp;
-                this.log(`🏠 <span class="text-cp-cyan font-bold">[휴식 완료]</span> 안전한 아파트에서 휴식을 취하고 체력을 완충했습니다.`);
-                this.updateUI();
-            }
-
-            trainStat(statKey) {
-                if (this.state.eddies < 200) {
-                    sound.playFail();
-                    return this.log(`<span class="text-cp-pink">❌ 단련비 (€$ 200)가 부족합니다!</span>`);
-                }
-
-                this.state.eddies -= 200;
-                this.state.stats[statKey] += 1;
-                sound.playSuccess();
-                this.log(`🏋️ <span class="text-cp-yellow font-bold">[훈련 완료]</span> ${statKey.toUpperCase()} 능력치가 +1 상승했습니다!`);
-                this.updateUI();
-                this.renderTabContent('activities');
-                this.saveGame();
-            }
-
-            triggerRandomEvent() {
-                if (Math.random() > 0.35) return; // 35% chance
-
-                const events = [
-                    {
-                        text: "⚡ [돌발 상황] NCPD 불심검문을 받았습니다. 뇌물로 €$ 50을 지출했습니다.",
-                        action: () => { this.state.eddies = Math.max(0, this.state.eddies - 50); }
-                    },
-                    {
-                        text: "🚑 [돌발 상황] 길거리에 부상당한 용병을 도와주고 감사 표시로 €$ 100을 받았습니다.",
-                        action: () => { this.state.eddies += 100; }
-                    },
-                    {
-                        text: "📡 [돌발 상황] 트라우마 팀의 긴급 구호 신호를 포착하여 방치된 치료 키트를 획득했습니다. (HP +20)",
-                        action: () => { this.state.hp = Math.min(this.state.maxHp, this.state.hp + 20); }
-                    }
-                ];
-
-                const ev = events[Math.floor(Math.random() * events.length)];
-                ev.action();
-                this.log(`<span class="text-purple-400 font-bold">${ev.text}</span>`);
-            }
-
-            getCurrentRank() {
-                let current = RANKS[0];
-                for (let r of RANKS) {
-                    if (this.state.cred >= r.cred) current = r;
-                }
-                return current;
-            }
-
-            updateUI() {
-                // Profile & Rank
-                const curRank = this.getCurrentRank();
-                document.getElementById('hud-name').innerText = this.state.name;
-                document.getElementById('hud-role').innerText = ROLES[this.state.role]?.name || '용병';
-                document.getElementById('hud-rank').innerText = curRank.title;
-                document.getElementById('hud-eddies').innerText = `€$ ${this.state.eddies.toLocaleString()}`;
-
-                // HP Bar
-                const hpPct = Math.max(0, Math.min(100, (this.state.hp / this.state.maxHp) * 100));
-                document.getElementById('hud-hp-text').innerText = `${this.state.hp} / ${this.state.maxHp}`;
-                document.getElementById('hud-hp-bar').style.width = `${hpPct}%`;
-
-                // Humanity Bar
-                const humPct = Math.max(0, Math.min(100, this.state.humanity));
-                document.getElementById('hud-humanity-text').innerText = `${humPct}%`;
-                document.getElementById('hud-humanity-bar').style.width = `${humPct}%`;
-
-                const warningEl = document.getElementById('hud-psychosis-warning');
-                if (this.state.humanity <= 25) {
-                    warningEl.classList.remove('hidden');
-                } else {
-                    warningEl.classList.add('hidden');
-                }
-
-                // Cred Progress
-                document.getElementById('hud-cred-text').innerText = `${this.state.cred} CRED`;
-                const credPct = Math.min(100, (this.state.cred / 1500) * 100);
-                document.getElementById('hud-cred-bar').style.width = `${credPct}%`;
-
-                // Stats
-                document.getElementById('stat-reflexes').innerText = this.state.stats.reflexes;
-                document.getElementById('stat-body').innerText = this.state.stats.body;
-                document.getElementById('stat-intelligence').innerText = this.state.stats.intelligence;
-                document.getElementById('stat-technical').innerText = this.state.stats.technical;
-                document.getElementById('stat-cool').innerText = this.state.stats.cool;
-
-                // Cyberware / Gear list
-                const cyberList = document.getElementById('equipped-list');
-                const totalItems = [...this.state.cyberware, ...this.state.inventory];
-                document.getElementById('hud-cyberware-count').innerText = `${totalItems.length} 개`;
-
-                if (totalItems.length === 0) {
-                    cyberList.innerHTML = `<span class="text-slate-600 italic">장착된 장비 없음</span>`;
-                } else {
-                    cyberList.innerHTML = totalItems.map(item => `
-                        <div class="flex justify-between items-center bg-slate-900 px-2 py-1 rounded border border-slate-800 text-[11px]">
-                            <span class="text-cp-cyan font-bold">${item.name}</span>
-                            <span class="text-[9px] text-slate-400">${item.type}</span>
-                        </div>
-                    `).join('');
-                }
-            }
-
-            log(msg) {
-                const logContainer = document.getElementById('terminal-log');
-                const time = new Date().toLocaleTimeString('ko-KR', { hour12: false });
-                const logEntry = document.createElement('div');
-                logEntry.className = 'border-l-2 border-slate-700 pl-2 py-0.5';
-                logEntry.innerHTML = `<span class="text-slate-500 text-[10px]">[${time}]</span> ${msg}`;
-                logContainer.appendChild(logEntry);
-                logContainer.scrollTop = logContainer.scrollHeight;
-            }
-
-            clearLogs() {
-                document.getElementById('terminal-log').innerHTML = '';
-            }
-
-            saveGame() {
-                try {
-                    localStorage.setItem('nc_edgerunner_save', JSON.stringify(this.state));
-                } catch (e) {}
-            }
-
-            loadGame() {
-                try {
-                    const saved = localStorage.getItem('nc_edgerunner_save');
-                    if (saved) {
-                        this.state = JSON.parse(saved);
-                        document.getElementById('screen-creation').classList.add('hidden');
-                        document.getElementById('screen-dashboard').classList.remove('hidden');
-                        this.switchTab(this.state.currentTab || 'gigs');
-                        this.log(`[시스템] 저장된 용병 프로필 로드 완료: <span class="text-cp-yellow font-bold">${this.state.name}</span>`);
-                    }
-                } catch (e) {}
-            }
-
-            resetGamePrompt() {
-                if (confirm('모든 데이터가 삭제되고 처음부터 다시 시작합니다. 계속하시겠습니까?')) {
-                    localStorage.removeItem('nc_edgerunner_save');
-                    location.reload();
-                }
-            }
+        const notes = [55, 55, 65, 55, 58, 55, 62, 55]; // Dark Synth Bassline
+        let step = 0;
+
+        bgmInterval = setInterval(() => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Synth Bass Pulse
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+
+            step++;
+        }, 200);
+    }
+
+    function stopSynthBGM() {
+        if (bgmInterval) clearInterval(bgmInterval);
+    }
+
+    document.getElementById('bgmToggle').addEventListener('click', toggleBGM);
+
+    // --- 게임 로직 ---
+    function updateUI() {
+        document.getElementById('dayDisplay').innerText = `DAY ${state.day} (CHAPTER ${state.chapter})`;
+        document.getElementById('humanityDisplay').innerText = `${state.humanity}%`;
+        document.getElementById('moneyDisplay').innerText = `€$ ${state.money}`;
+        document.getElementById('credDisplay').innerText = `LV.${state.cred} (${getCredTitle(state.cred)})`;
+
+        if (state.humanity <= 30) {
+            document.getElementById('humanityDisplay').classList.add('danger');
+        } else {
+            document.getElementById('humanityDisplay').classList.remove('danger');
+        }
+    }
+
+    function getCredTitle(cred) {
+        if (cred < 3) return "부랑아";
+        if (cred < 7) return "용병";
+        return "엣지러너";
+    }
+
+    function renderStory() {
+        const currentData = storyData.find(s => s.day === state.day);
+
+        if (!currentData) {
+            // 챕터 종료 -> 인터미션
+            showIntermission();
+            return;
         }
 
-        // Global Instance Initialization
-        const game = new CyberpunkGame();
-        window.onload = () => {
-            game.init();
-        };
-    </script>
+        document.getElementById('storyView').classList.remove('hidden');
+        document.getElementById('resultView').classList.add('hidden');
+        document.getElementById('intermissionView').classList.add('hidden');
+
+        document.getElementById('storyText').innerText = currentData.text;
+
+        const choicesBox = document.getElementById('choicesBox');
+        choicesBox.innerHTML = '';
+
+        currentData.choices.forEach((choice, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = choice.text;
+            btn.onclick = () => selectChoice(choice);
+            choicesBox.appendChild(btn);
+        });
+    }
+
+    function selectChoice(choice) {
+        // 능력치 변화 적용
+        state.money += choice.changes.money;
+        state.cred += choice.changes.cred;
+        state.humanity += choice.changes.humanity;
+        if (state.humanity > 100) state.humanity = 100;
+
+        // 결과 화면 연출
+        document.getElementById('storyView').classList.add('hidden');
+        document.getElementById('resultView').classList.remove('hidden');
+
+        document.getElementById('resultText').innerText = choice.result;
+        document.getElementById('resultChanges').innerText = 
+            `[변동 사항] 에디: ${choice.changes.money >= 0 ? '+' : ''}${choice.changes.money} | 평판: +${choice.changes.cred} | 인간성: ${choice.changes.humanity}%`;
+
+        updateUI();
+    }
+
+    function nextDay() {
+        state.day++;
+        updateUI();
+        renderStory();
+    }
+
+    function showIntermission() {
+        document.getElementById('storyView').classList.add('hidden');
+        document.getElementById('resultView').classList.add('hidden');
+        document.getElementById('intermissionView').classList.remove('hidden');
+    }
+
+    function buyImplant(type, cost, humCost, statName, statValue) {
+        if (state.money < cost) {
+            alert("에디(돈)가 부족합니다!");
+            return;
+        }
+        state.money -= cost;
+        state.humanity -= humCost;
+        alert(`[리퍼닥 시술 완료] ${statName} +${statValue} 상승 / 인간성 -${humCost}%`);
+        updateUI();
+    }
+
+    function buyWeapon(type, cost) {
+        if (state.money < cost) {
+            alert("에디(돈)가 부족합니다!");
+            return;
+        }
+        state.money -= cost;
+        alert("[구매 완료] 스마트 피스톨을 장착했습니다.");
+        updateUI();
+    }
+
+    function buyHeal(cost) {
+        if (state.money < cost) {
+            alert("에디(돈)가 부족합니다!");
+            return;
+        }
+        state.money -= cost;
+        state.humanity = Math.min(100, state.humanity + 5);
+        alert("[치료 완료] 인간성이 5% 회복되었습니다.");
+        updateUI();
+    }
+
+    function startNextChapter() {
+        state.chapter++;
+        // 신규 스토리 데이터 추가 가능
+        alert(`CHAPTER ${state.chapter} 가 시작됩니다!`);
+        renderStory();
+    }
+
+    // 초기화 실행
+    updateUI();
+    renderStory();
+</script>
+
 </body>
 </html>
