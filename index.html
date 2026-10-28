@@ -544,6 +544,46 @@ function drawSprite(canvas, config = {}, enemy = false) {
   }
 }
 
+function drawAll() {
+  const look = {
+    ...state.look,
+    chromes: state.chromes
+  };
+
+  // 대시보드 캐릭터
+  const mainCanvas = document.getElementById('spriteMain');
+  if (mainCanvas) {
+    drawSprite(mainCanvas, look);
+  }
+
+  // 커스터마이징 미리보기
+  const editorCanvas = document.getElementById('spriteEditor');
+  if (editorCanvas) {
+    drawSprite(editorCanvas, look);
+  }
+
+  // 전투 화면의 플레이어 캐릭터
+  const battleCanvas = document.getElementById('battlePlayer');
+  if (battleCanvas) {
+    drawSprite(battleCanvas, look);
+  }
+
+  // 캐릭터 이름 표시
+  const name = state.name || 'V';
+
+  const spriteName = document.getElementById('spriteName');
+  if (spriteName) spriteName.textContent = name;
+
+  const editorName = document.getElementById('editorName');
+  if (editorName) editorName.textContent = name;
+
+  const spriteStyle = document.getElementById('spriteStyle');
+  if (spriteStyle) {
+    spriteStyle.textContent =
+      (styleNames[state.style] || '솔로').toUpperCase()
+      + ' // NIGHT CITY';
+  }
+}
 function updateStatsEditor() {
   const s = effectiveStats();
 
@@ -654,12 +694,14 @@ function applyLook() {
   state.name = $('nameInput').value.trim() || 'V';
   state.style = $('styleInput').value;
 
-  state.look = {
-    hair:$('hairInput').value,
-    jacket:$('jacketInput').value,
-    skin:$('skinInput').value,
-    eye:$('eyeInput').value
-  };
+state.look = {
+  hair: $('hairInput').value,
+  jacket: $('jacketInput').value,
+  skin: $('skinInput').value,
+  eye: $('eyeInput').value,
+  pants: state.look.pants || '#aaa995'
+};
+
 
   drawAll();
   updateUI();
