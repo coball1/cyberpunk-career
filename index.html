@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NIGHT CITY: MERCENARY LAB</title>
+<style>
+:root{--bg:#080a10;--panel:#111722;--panel2:#171f2c;--line:#2a3b4b;--cyan:#42f5e9;--pink:#ff3d81;--yellow:#f6ed67;--green:#83ff9d;--text:#e8f1f5;--muted:#8ea3b3;--danger:#ff6b76}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#152331 0,#080a10 56%);color:var(--text);font:14px/1.5 Consolas,"Courier New",monospace;min-height:100vh;padding:18px}
+button,input,select{font:inherit}
+button{cursor:pointer;background:#101b26;color:var(--cyan);border:1px solid var(--cyan);padding:9px 12px;font-weight:bold}
+button:hover{background:var(--cyan);color:#071015}
+button:disabled{opacity:.35;cursor:not-allowed}
+.app{max-width:1200px;margin:auto;border:1px solid var(--cyan);box-shadow:0 0 30px #42f5e922;background:#0b1018ee}
+header{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:18px 20px;border-bottom:2px solid var(--pink);flex-wrap:wrap}
+h1{font-size:clamp(19px,3vw,28px);color:var(--yellow);margin:0;letter-spacing:1px;text-shadow:2px 2px var(--pink)}
+.tag{color:var(--muted);font-size:11px}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(95px,1fr));gap:8px;padding:12px;border-bottom:1px solid var(--line)}
+.stat{background:#070b11;padding:10px;border:1px solid var(--line)}
+.stat small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}
+.stat strong{font-size:16px;color:var(--cyan)}
+.stat .money{color:var(--yellow)}
+.stat .rep{color:var(--green)}
+.meter{height:5px;background:#263341;margin-top:7px}
+.meter span{display:block;height:100%;background:var(--green)}
+nav{display:flex;gap:5px;padding:10px 12px;border-bottom:1px solid var(--line);overflow:auto}
+nav button{white-space:nowrap;border-color:var(--line);color:var(--muted)}
+nav button.active{color:var(--yellow);border-color:var(--yellow);background:#f6ed6712}
+main{padding:14px}
+.view{display:none}
+.view.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);padding:14px;min-width:0}
+.panel h2,.panel h3{margin:0 0 12px;color:var(--cyan);font-size:15px}
+.panel h2{font-size:18px}
+.span-4{grid-column:span 4}
+.span-5{grid-column:span 5}
+.span-6{grid-column:span 6}
+.span-7{grid-column:span 7}
+.span-8{grid-column:span 8}
+.span-12{grid-column:span 12}
+.muted{color:var(--muted)}
+.yellow{color:var(--yellow)}
+.pink{color:var(--pink)}
+.green{color:var(--green)}
+label{display:block;color:var(--muted);font-size:11px;margin:10px 0 4px}
+input,select{width:100%;background:#070b11;color:var(--text);border:1px solid var(--line);padding:9px;outline:none}
+input:focus,select:focus{border-color:var(--cyan)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row>*{flex:1}
+.row button{flex:0 0 auto}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed #2b3945}
+.item:last-child{border-bottom:0}
+.item p{margin:3px 0;color:var(--muted);font-size:12px}
+.item .price{color:var(--yellow);white-space:nowrap}
+.item button{min-width:82px}
+.pill{display:inline-block;border:1px solid var(--line);padding:2px 6px;font-size:10px;color:var(--muted);margin:2px}
+.pixel-stage{min-height:250px;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(#101b2a,#080b11);border:1px solid #253c4c;position:relative;overflow:hidden}
+.pixel-stage:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 15px,#42f5e907 16px),repeating-linear-gradient(90deg,transparent 0 15px,#42f5e907 16px)}
+canvas{width:160px;height:192px;image-rendering:pixelated;position:relative;z-index:1}
+.sprite-name{z-index:1;color:var(--yellow);margin-top:5px}
+.sprite-caption{z-index:1;font-size:10px;color:var(--muted)}
+.battle-stage{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;min-height:220px;background:linear-gradient(90deg,#10212a,#0a0e17,#241020);border:1px solid var(--line);padding:12px}
+.fighter{text-align:center}
+.fighter canvas{width:100px;height:120px}
+.vs{font-size:24px;color:var(--pink);font-weight:bold}
+.health{height:8px;background:#2d3039;margin-top:6px}
+.health span{display:block;height:100%;background:var(--green)}
+.enemy-card{border:1px solid var(--line);padding:10px;background:#0b111a;margin-bottom:8px}
+.enemy-card.selected{border-color:var(--yellow);background:#f6ed6709}
+.enemy-card button{margin-top:8px}
+.log{background:#05080d;border:1px solid var(--line);padding:12px;max-height:240px;overflow:auto;font-size:12px}
+.log div{padding:3px 0;border-bottom:1px solid #ffffff0a}
+.result{padding:12px;border:1px solid var(--cyan);background:#42f5e90c;margin-top:10px}
+.danger{color:var(--danger)}
+.footer{padding:12px 18px;color:var(--muted);font-size:10px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.notice{position:fixed;bottom:18px;right:18px;max-width:340px;background:#101b26;border:1px solid var(--yellow);padding:12px 16px;box-shadow:0 0 20px #000;z-index:10;display:none}
+.notice.show{display:block}
+@media(max-width:800px){
+.stats{grid-template-columns:repeat(3,1fr)}
+.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}
+.battle-stage{gap:4px;padding:6px}
+.fighter canvas{width:76px;height:95px}
+.vs{font-size:18px}
+}
+@media(max-width:440px){
+body{padding:4px}
+.stats{grid-template-columns:repeat(2,1fr)}
+header{padding:12px}
+main{padding:8px}
+.panel{padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <h1>NIGHT CITY: MERCENARY LAB</h1>
+    <div class="tag">PIXEL MERCENARY SIMULATOR // BUILD. FIGHT. SURVIVE.</div>
+  </div>
+  <div class="header-actions">
+    <button id="saveBtn">저장</button>
+    <button id="resetBtn">초기화</button>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="stat"><small>용병 / 레벨</small><strong id="statName">V / Lv.1</strong></div>
+  <div class="stat"><small>체력</small><strong id="statHp">100 / 100</strong><div class="meter"><span id="hpMeter" style="width:100%"></span></div></div>
+  <div class="stat"><small>인간성</small><strong id="statHumanity">100%</strong><div class="meter"><span id="humanMeter" style="width:100%;background:var(--pink)"></span></div></div>
+  <div class="stat"><small>에디</small><strong class="money" id="statMoney">€$ 1,500</strong></div>
+  <div class="stat"><small>명성</small><strong class="rep" id="statFame">0</strong></div>
+  <div class="stat"><small>경험치</small><strong id="statXp">0 / 100</strong></div>
+</section>
+
+<nav>
+  <button class="active" data-view="dashboard">대시보드</button>
+  <button data-view="character">캐릭터 제작소</button>
+  <button data-view="arena">전투 아레나</button>
+  <button data-view="chrome">리퍼닥 / 크롬</button>
+  <button data-view="market">무기 상점</button>
+  <button data-view="record">전투 기록</button>
+</nav>
+
+<main>
+<section id="dashboard" class="view active">
+<div class="grid">
+  <div class="panel span-4">
+    <h2>용병 프로필</h2>
+    <div class="pixel-stage">
+      <canvas id="spriteMain" width="40" height="48"></canvas>
+      <div class="sprite-name" id="spriteName">V</div>
+      <div class="sprite-caption" id="spriteStyle">SOLO // NIGHT CITY</div>
+    </div>
+    <div class="item"><span>전투 스타일</span><b id="dashStyle">솔로</b></div>
+    <div class="item"><span>주 무기</span><b id="dashWeapon">유니티 권총</b></div>
+    <div class="item"><span>장착 크롬</span><b id="dashChrome">0개</b></div>
+    <button style="width:100%;margin-top:12px" data-goto="character">캐릭터 편집</button>
+  </div>
+  <div class="panel span-8">
+    <h2>나이트 시티 네트워크</h2>
+    <p class="muted">의뢰를 기다릴 필요는 없다. 상대를 고르고, 빌드를 시험하고, 살아남아 명성을 쌓으십시오.</p>
+    <div class="grid" style="margin-top:14px">
+      <div class="panel span-6">
+        <h3>현재 상태</h3>
+        <div id="statusText">거리의 신참 용병입니다.</div>
+        <p class="muted" style="margin-top:8px">승리할수록 더 강한 적이 등장합니다. 패배하면 체력이 감소하므로 필요하면 회복하세요.</p>
+      </div>
+      <div class="panel span-6">
+        <h3>성장 목표</h3>
+        <div class="item"><span>다음 레벨</span><b id="nextLevel">100 XP</b></div>
+        <div class="item"><span>승리 / 패배</span><b id="dashRecord">0 / 0</b></div>
+        <div class="item"><span>평판 등급</span><b id="repTitle">부랑아</b></div>
+      </div>
+    </div>
+    <button style="margin-top:12px" data-goto="arena">상대 찾기 →</button>
+  </div>
+  <div class="panel span-12">
+    <h2>최근 활동</h2>
+    <div id="recentActivity" class="muted">아직 기록이 없습니다. 아레나에서 첫 전투를 시작하세요.</div>
+  </div>
+</div>
+</section>
+
+<section id="character" class="view">
+<div class="grid">
+  <div class="panel span-5">
+    <h2>픽셀 캐릭터 커스터마이징</h2>
+    <p class="muted">외형 변경은 즉시 반영됩니다. 크롬을 장착하면 신체 픽셀도 변합니다.</p>
+    <label>코드네임</label><input id="nameInput" maxlength="18" value="V">
+    <label>전투 스타일</label>
+    <select id="styleInput">
+      <option value="solo">솔로 — 정면 화력전</option>
+      <option value="assassin">암살자 — 회피·근접 치명타</option>
+      <option value="netrunner">넷러너 — 해킹·교란</option>
+      <option value="sniper">저격수 — 정밀 사격</option>
+      <option value="tech">테크니션 — 장비·방어 특화</option>
+    </select>
+    <div class="row">
+      <div><label>헤어 컬러</label><select id="hairInput"><option value="#f6ed67">네온 옐로</option><option value="#ff3d81">네온 핑크</option><option value="#42f5e9">사이버 시안</option><option value="#e8f1f5">실버</option><option value="#7b67ff">바이올렛</option></select></div>
+      <div><label>재킷</label><select id="jacketInput"><option value="#ff3d81">핑크</option><option value="#42f5e9">시안</option><option value="#f6ed67">옐로</option><option value="#58677b">스틸 그레이</option><option value="#7b67ff">바이올렛</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>피부 톤</label><select id="skinInput"><option value="#d69b78">웜</option><option value="#f0c7a4">라이트</option><option value="#9b654e">브론즈</option><option value="#68473f">다크</option></select></div>
+      <div><label>눈 / 광학 색상</label><select id="eyeInput"><option value="#42f5e9">시안</option><option value="#ff3d81">핑크</option><option value="#f6ed67">옐로</option><option value="#83ff9d">그린</option></select></div>
+    </div>
+    <button id="applyLook" style="width:100%;margin-top:14px">외형 및 빌드 적용</button>
+  </div>
+  <div class="panel span-7">
+    <h2>캐릭터 미리보기</h2>
+    <div class="pixel-stage" style="min-height:330px">
+      <canvas id="spriteEditor" width="40" height="48" style="width:200px;height:240px"></canvas>
+      <div class="sprite-name" id="editorName">V</div>
+      <div class="sprite-caption">PIXEL SPRITE // EQUIPPED CHROME VISUALIZED</div>
+    </div>
+    <h3 style="margin-top:14px">능력치</h3>
+    <div id="statsEditor"></div>
+    <p class="muted">레벨업 시 능력치가 자동으로 성장합니다. 전투 스타일과 장비가 최종 전투력에 반영됩니다.</p>
+  </div>
+</div>
+</section>
+
+<section id="arena" class="view">
+<div class="grid">
+  <div class="panel span-4">
+    <h2>상대 목록</h2>
+    <p class="muted">명성과 승리에 따라 더 위험한 상대가 해금됩니다.</p>
+    <div id="enemyList" style="margin-top:10px"></div>
+  </div>
+  <div class="panel span-8">
+    <h2>전투 시뮬레이션</h2>
+    <div class="battle-stage">
+      <div class="fighter">
+        <canvas id="battlePlayer" width="40" height="48"></canvas>
+        <b id="battlePlayerName">V</b>
+        <div class="health"><span id="battlePlayerHp" style="width:100%"></span></div>
+        <small id="battlePlayerHpText">100 HP</small>
+      </div>
+      <div class="vs">VS</div>
+      <div class="fighter">
+        <canvas id="battleEnemy" width="40" height="48"></canvas>
+        <b id="battleEnemyName">상대를 선택하세요</b>
+        <div class="health"><span id="battleEnemyHp" style="width:100%;background:var(--pink)"></span></div>
+        <small id="battleEnemyHpText">-- HP</small>
+      </div>
+    </div>
+    <div id="enemyDetails" class="result">전투 상대를 선택하면 전투력과 예상 난이도를 확인할 수 있습니다.</div>
+    <div class="row" style="margin-top:12px"><button id="fightBtn" disabled>자동 전투 시작</button><button id="healBtn">응급 치료 €$ 250</button></div>
+    <h3 style="margin-top:18px">전투 로그</h3>
+    <div class="log" id="battleLog"><div class="muted">전투를 시작하면 전투 계산 결과가 이곳에 표시됩니다.</div></div>
+    <div id="battleResult"></div>
+  </div>
+</div>
+</section>
+
+<section id="chrome" class="view">
+<div class="grid">
+  <div class="panel span-7">
+    <h2>리퍼닥 — 크롬 및 사이버웨어</h2>
+    <p class="muted">크롬은 슬롯별로 장착됩니다. 새 크롬을 장착할 때마다 인간성이 감소합니다. 이미 장착한 크롬을 다시 장착해도 인간성은 추가로 감소하지 않습니다.</p>
+    <div id="chromeShop"></div>
+  </div>
+  <div class="panel span-5">
+    <h2>장착 중인 크롬</h2>
+    <div id="equippedChrome"></div>
+    <div class="result"><b class="pink">인간성 경고</b><p class="muted">인간성이 낮아질수록 사이버사이코시스 위험이 커집니다. 현재 버전에서는 인간성이 전투 성능과 일부 이벤트에 영향을 주는 기본 시스템으로 구현됩니다.</p></div>
+  </div>
+</div>
+</section>
+
+<section id="market" class="view">
+<div class="grid">
+  <div class="panel span-7"><h2>암시장 — 무기 및 장비</h2><div id="weaponShop"></div></div>
+  <div class="panel span-5">
+    <h2>보유 무기</h2><div id="weaponInventory"></div>
+    <h3 style="margin-top:15px">소모품</h3>
+    <div class="item"><div><b>바운스 백</b><p>체력 35 회복 (최대 체력까지)</p></div><button id="buyMed">구매 €$ 180</button></div>
+  </div>
+</div>
+</section>
+
+<section id="record" class="view">
+<div class="grid">
+  <div class="panel span-4">
+    <h2>커리어 기록</h2>
+    <div class="item"><span>승리</span><b id="recWins">0</b></div>
+    <div class="item"><span>패배</span><b id="recLosses">0</b></div>
+    <div class="item"><span>총 전투</span><b id="recTotal">0</b></div>
+    <div class="item"><span>연승</span><b id="recStreak">0</b></div>
+    <div class="item"><span>최고 연승</span><b id="recBest">0</b></div>
+  </div>
+  <div class="panel span-8">
+    <h2>전투 히스토리</h2>
+    <div id="historyList" class="log">아직 전투 기록이 없습니다.</div>
+    <button id="clearHistory" style="margin-top:10px">기록 지우기</button>
+  </div>
+</div>
+</section>
+</main>
+<div class="footer"><span>UNOFFICIAL FAN-MADE CONCEPT // NOT AFFILIATED WITH CD PROJEKT RED</span><span>LOCAL SAVE ENABLED · PIXEL BUILD 0.1</span></div>
+</div>
+<div id="notice" class="notice"></div><script>
+const $ = id => document.getElementById(id);
+
+const chromeCatalog = [
+  {id:'dermal',name:'피하 장갑',slot:'피부',cost:900,humanity:5,desc:'피부 아래 삽입하는 충격 흡수 장갑',stats:{def:5},look:'armor'},
+  {id:'optics',name:'키로시 광학 임플란트',slot:'눈',cost:1200,humanity:7,desc:'표적 분석 및 명중률 향상',stats:{aim:7},look:'eye'},
+  {id:'neural',name:'신경 연결 장치',slot:'신경',cost:1600,humanity:9,desc:'반응 속도와 해킹 처리 능력 강화',stats:{speed:7,hack:5},look:'neural'},
+  {id:'sandevistan',name:'산데비스탄 MK.II',slot:'신경',cost:2800,humanity:16,desc:'순간 가속으로 선공과 회피 강화',stats:{speed:16,crit:5},look:'sandevistan'},
+  {id:'gorilla',name:'고릴라 암',slot:'팔',cost:2400,humanity:13,desc:'근접 공격과 신체 능력 강화',stats:{power:14},look:'arm'},
+  {id:'mantis',name:'맨티스 블레이드',slot:'팔',cost:3200,humanity:18,desc:'팔에 내장되는 고속 근접 블레이드',stats:{power:10,crit:10},look:'mantis'},
+  {id:'cyberdeck',name:'넷워치 넷드라이버',slot:'운영체제',cost:2600,humanity:15,desc:'해킹 능력과 교란 효과 강화',stats:{hack:18},look:'deck'},
+  {id:'subdermal',name:'강화 피하 장갑판',slot:'피부',cost:3500,humanity:17,desc:'고급 방탄 피부 장갑판',stats:{def:15,hp:10},look:'armor'},
+  {id:'monowire',name:'모노와이어',slot:'팔',cost:3900,humanity:20,desc:'고속 단분자 와이어',stats:{power:12,crit:12},look:'wire'}
+];
+
+const weaponCatalog = [
+  {id:'unity',name:'유니티 권총',cost:0,desc:'신뢰할 수 있는 기본 파워 피스톨',stats:{power:5,aim:3},type:'권총'},
+  {id:'omaha',name:'오마하 스마트 피스톨',cost:1200,desc:'스마트 탄환으로 명중률 보정',stats:{power:9,aim:12},type:'스마트'},
+  {id:'saratoga',name:'사타라 테크 샷건',cost:2200,desc:'근거리에서 높은 피해',stats:{power:18,aim:-2},type:'샷건'},
+  {id:'widow',name:'위도우 메이커',cost:3600,desc:'정밀한 테크 라이플',stats:{power:20,aim:8},type:'라이플'},
+  {id:'katana',name:'진추마루 카타나',cost:2800,desc:'근접 빌드의 치명타 무기',stats:{power:15,crit:15},type:'근접'},
+  {id:'overwatch',name:'오버워치 저격총',cost:4300,desc:'장거리 정밀 사격',stats:{power:25,aim:15},type:'저격'}
+];
+
+const enemies = [
+  {id:'thug',name:'왓슨 거리의 갱단원',faction:'거리의 갱단',unlock:0,hp:48,power:9,def:2,aim:48,style:'난폭한 근접전',reward:180,fame:2,xp:25,color:'#ff3d81',skin:'#b77d60'},
+  {id:'scav',name:'스캐빈저 회수팀',faction:'스캐빈저',unlock:0,hp:65,power:12,def:4,aim:53,style:'약물·기습 공격',reward:260,fame:3,xp:35,color:'#f6ed67',skin:'#d69b78'},
+  {id:'tyger',name:'타이거 클로 정예',faction:'타이거 클로',unlock:5,hp:85,power:16,def:6,aim:62,style:'빠른 근접 연속 공격',reward:420,fame:5,xp:50,color:'#ff3d81',skin:'#d69b78'},
+  {id:'maelstrom',name:'멜스트롬 크롬헤드',faction:'멜스트롬',unlock:10,hp:112,power:19,def:10,aim:60,style:'고화력·고위험 크롬 전투',reward:620,fame:7,xp:65,color:'#ff4545',skin:'#9b654e'},
+  {id:'arasaka',name:'아라사카 보안 엘리트',faction:'아라사카',unlock:18,hp:140,power:22,def:14,aim:72,style:'전술 사격·방어',reward:900,fame:10,xp:90,color:'#e8f1f5',skin:'#d69b78'},
+  {id:'adam',name:'아담 스매셔',faction:'아라사카 / 보스',unlock:30,hp:220,power:30,def:18,aim:72,style:'중무장 사이보그·압도적 화력',reward:1800,fame:20,xp:160,color:'#ff3d81',skin:'#8c8e99'},
+  {id:'rogue',name:'로그 아멘디아레스',faction:'애프터라이프',unlock:45,hp:185,power:28,def:14,aim:82,style:'베테랑 솔로·정밀 사격',reward:1500,fame:18,xp:140,color:'#f6ed67',skin:'#d69b78'},
+  {id:'johnny',name:'조니 실버핸드',faction:'레전드',unlock:60,hp:205,power:32,def:13,aim:80,style:'은제 팔·파워 피스톨',reward:2200,fame:25,xp:200,color:'#42f5e9',skin:'#d69b78'}
+];
+
+const baseStats = {
+  power:10,def:5,aim:60,speed:10,hack:5,crit:5,hp:100
+};
+
+const defaultState = () => ({
+  name:'V',
+  style:'solo',
+  look:{
+    hair:'#f6ed67',
+    jacket:'#ff3d81',
+    skin:'#d69b78',
+    eye:'#42f5e9'
+  },
+  level:1,
+  xp:0,
+  hp:100,
+  maxHp:100,
+  humanity:100,
+  money:1500,
+  fame:0,
+  stats:{...baseStats},
+  weapons:['unity'],
+  weapon:'unity',
+  chromes:[],
+  wins:0,
+  losses:0,
+  streak:0,
+  bestStreak:0,
+  history:[],
+  activity:[],
+  medkits:0,
+  selectedEnemy:'thug',
+  battleCount:0
+});
+
+let state = defaultState();
+
+const styleNames = {
+  solo:'솔로',
+  assassin:'암살자',
+  netrunner:'넷러너',
+  sniper:'저격수',
+  tech:'테크니션'
+};
+
+function notify(msg) {
+  $('notice').textContent = msg;
+  $('notice').classList.add('show');
+  setTimeout(() => $('notice').classList.remove('show'), 2600);
+}
+
+function money(n) {
+  return '€$ ' + n.toLocaleString('ko-KR');
+}
+
+function chromeById(id) {
+  return chromeCatalog.find(x => x.id === id);
+}
+
+function weaponById(id) {
+  return weaponCatalog.find(x => x.id === id) || weaponCatalog[0];
+}
+
+function equipped() {
+  return state.chromes.map(chromeById).filter(Boolean);
+}
+
+function effectiveStats() {
+  let s = {...state.stats};
+  s.hp = state.maxHp;
+
+  for (const c of equipped()) {
+    for (const [k,v] of Object.entries(c.stats)) {
+      s[k] = (s[k] || 0) + v;
+    }
+  }
+
+  const w = weaponById(state.weapon);
+  for (const [k,v] of Object.entries(w.stats)) {
+    s[k] = (s[k] || 0) + v;
+  }
+
+  const style = {
+    solo:{power:5,def:2},
+    assassin:{speed:8,crit:12},
+    netrunner:{hack:16,aim:2},
+    sniper:{aim:15,crit:5},
+    tech:{def:7,hack:3}
+  }[state.style] || {};
+
+  for (const [k,v] of Object.entries(style)) {
+    s[k] = (s[k] || 0) + v;
+  }
+
+  return s;
+}
+
+function calcPower(s = effectiveStats()) {
+  return Math.round(
+    s.power * 1.7 +
+    s.def * 1.1 +
+    s.aim * 0.35 +
+    s.speed * 0.6 +
+    s.hack * 0.45 +
+    s.crit * 0.35 +
+    state.level * 3
+  );
+}
+
+// 픽셀 캐릭터 그리기
+function drawSprite(canvas, config = {}, enemy = false) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.imageSmoothingEnabled = false;
+
+  const px = (x,y,w,h,c) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(x,y,w,h);
+  };
+
+  const hair = config.hair || '#f6ed67';
+  const jacket = config.jacket || '#ff3d81';
+  const skin = config.skin || '#d69b78';
+  const eye = config.eye || '#42f5e9';
+  const dark = '#10141d';
+  const pants = '#303c50';
+  const chrome = enemy ? (config.chrome || '#7b8794') : '#b6c5d1';
+
+  px(9,44,22,2,'#253040');
+  px(13,35,5,8,dark);
+  px(22,35,5,8,dark);
+  px(12,41,7,3,pants);
+  px(21,41,7,3,pants);
+
+  // 몸통과 재킷
+  px(11,21,18,15,jacket);
+  px(9,23,4,10,jacket);
+  px(27,23,4,10,jacket);
+  px(14,22,4,12,enemy ? chrome : dark);
+  px(22,22,4,12,dark);
+  px(18,24,4,8,skin);
+
+  // 목과 얼굴
+  px(17,17,6,5,skin);
+  px(13,8,14,11,skin);
+  px(12,10,2,7,skin);
+  px(26,10,2,7,skin);
+  px(13,5,14,5,hair);
+  px(11,7,4,5,hair);
+  px(24,7,4,4,hair);
+  px(14,13,4,2,dark);
+  px(22,13,4,2,dark);
+  px(15,13,2,2,eye);
+  px(22,13,2,2,eye);
+  px(18,17,4,1,dark);
+
+  // 크롬에 따른 외형 변화
+  const chromeSet = config.chromes || [];
+
+  if (chromeSet.some(c => ['optics','sandevistan'].includes(c))) {
+    px(22,13,2,2,'#fff');
+    px(24,14,2,1,eye);
+  }
+
+  if (chromeSet.some(c => ['gorilla','mantis','monowire'].includes(c))) {
+    px(9,25,4,9,chrome);
+    px(27,25,4,9,chrome);
+
+    if (chromeSet.includes('mantis')) {
+      px(8,18,2,8,'#d9edf7');
+      px(30,18,2,8,'#d9edf7');
+    }
+  }
+
+  if (chromeSet.some(c => ['dermal','subdermal'].includes(c))) {
+    px(12,26,3,6,chrome);
+    px(25,26,3,6,chrome);
+  }
+
+  if (chromeSet.includes('cyberdeck')) {
+    px(26,20,4,3,'#42f5e9');
+  }
+
+  if (chromeSet.includes('neural')) {
+    px(12,15,2,2,'#42f5e9');
+    px(26,15,2,2,'#42f5e9');
+  }
+
+  if (chromeSet.includes('wire')) {
+    px(30,28,2,8,'#42f5e9');
+  }
+
+  if (enemy) {
+    px(13,22,14,2,config.accent || '#f6ed67');
+  }
+}
+
+function playerLook() {
+  return {...state.look,chromes:state.chromes};
+}
+
+function drawAll() {
+  drawSprite($('spriteMain'),playerLook());
+  drawSprite($('spriteEditor'),playerLook());
+  drawSprite($('battlePlayer'),playerLook());
+
+  $('spriteName').textContent = state.name;
+  $('editorName').textContent = state.name;
+  $('spriteStyle').textContent =
+    styleNames[state.style].toUpperCase() + ' // NIGHT CITY';
+  $('battlePlayerName').textContent = state.name;
+}
+
+function updateStatsEditor() {
+  const s = effectiveStats();
+
+  $('statsEditor').innerHTML = [
+    ['화력',s.power],
+    ['방어',s.def],
+    ['명중',s.aim+'%'],
+    ['반사신경',s.speed],
+    ['해킹',s.hack],
+    ['치명타',s.crit+'%'],
+    ['전투력',calcPower(s)]
+  ].map(([k,v]) =>
+    `<div class="item"><span>${k}</span><b>${v}</b></div>`
+  ).join('');
+}
+
+function repTitle() {
+  if (state.fame < 10) return '부랑아';
+  if (state.fame < 30) return '거리의 용병';
+  if (state.fame < 65) return '유능한 엣지러너';
+  if (state.fame < 120) return '악명 높은 솔로';
+  return '애프터라이프 전설';
+}
+
+function updateUI() {
+  state.hp = Math.max(0,Math.min(state.maxHp,state.hp));
+  state.humanity = Math.max(0,Math.min(100,state.humanity));
+
+  $('statName').textContent = `${state.name} / Lv.${state.level}`;
+  $('statHp').textContent = `${state.hp} / ${state.maxHp}`;
+  $('hpMeter').style.width = (state.hp/state.maxHp*100)+'%';
+
+  $('statHumanity').textContent = state.humanity+'%';
+  $('humanMeter').style.width = state.humanity+'%';
+
+  $('statMoney').textContent = money(state.money);
+  $('statFame').textContent = state.fame;
+  $('statXp').textContent = `${state.xp} / ${state.level*100}`;
+
+  $('dashStyle').textContent = styleNames[state.style];
+  $('dashWeapon').textContent = weaponById(state.weapon).name;
+  $('dashChrome').textContent = state.chromes.length+'개';
+  $('dashRecord').textContent = `${state.wins} / ${state.losses}`;
+  $('repTitle').textContent = repTitle();
+  $('nextLevel').textContent = (state.level*100-state.xp)+' XP';
+
+  $('statusText').textContent =
+    state.hp <= 0 ? '중상 상태입니다. 치료를 받기 전까지 전투할 수 없습니다.' :
+    state.humanity <= 20 ? '인간성이 위험 수준입니다. 크롬 장착을 신중히 하십시오.' :
+    state.level === 1 ? '거리의 신참 용병입니다.' :
+    repTitle()+' — 다음 목표를 선택하십시오.';
+
+  $('recWins').textContent = state.wins;
+  $('recLosses').textContent = state.losses;
+  $('recTotal').textContent = state.battleCount;
+  $('recStreak').textContent = state.streak;
+  $('recBest').textContent = state.bestStreak;
+
+  drawAll();
+  updateStatsEditor();
+  renderEnemies();
+  renderChrome();
+  renderWeapons();
+  renderRecords();
+  renderBattleSelection();
+}
+
+function addActivity(t) {
+  state.activity.unshift(t);
+  state.activity = state.activity.slice(0,4);
+
+  $('recentActivity').innerHTML = state.activity
+    .map(x => `<div class="item"><span>${escapeHtml(x)}</span></div>`)
+    .join('') || '아직 기록이 없습니다.';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g,c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+function go(view) {
+  document.querySelectorAll('.view').forEach(v =>
+    v.classList.toggle('active',v.id===view)
+  );
+
+  document.querySelectorAll('nav button[data-view]').forEach(b =>
+    b.classList.toggle('active',b.dataset.view===view)
+  );
+
+  if (view === 'arena') renderEnemies();
+}
+
+document.querySelectorAll('nav button[data-view]').forEach(b =>
+  b.addEventListener('click',() => go(b.dataset.view))
+);
+
+document.querySelectorAll('[data-goto]').forEach(b =>
+  b.addEventListener('click',() => go(b.dataset.goto))
+);
+
+function applyLook() {
+  state.name = $('nameInput').value.trim() || 'V';
+  state.style = $('styleInput').value;
+
+  state.look = {
+    hair:$('hairInput').value,
+    jacket:$('jacketInput').value,
+    skin:$('skinInput').value,
+    eye:$('eyeInput').value
+  };
+
+  drawAll();
+  updateUI();
+  notify('캐릭터 외형과 빌드를 적용했습니다.');
+}
+
+$('applyLook').addEventListener('click',applyLook);
+
+// 상대 목록
+function renderEnemies() {
+  const list = $('enemyList');
+  list.innerHTML = '';
+
+  enemies.forEach(e => {
+    const unlocked = state.fame >= e.unlock;
+    const div = document.createElement('div');
+
+    div.className = 'enemy-card' +
+      (state.selectedEnemy===e.id ? ' selected' : '');
+
+    div.innerHTML = `
+      <b>${unlocked ? escapeHtml(e.name) : '??? — 미확인 상대'}</b>
+      <div class="muted">${unlocked ? escapeHtml(e.faction) : '명성 '+e.unlock+' 필요'}</div>
+      <div class="pill">${unlocked ? '권장 전투력 '+Math.round(e.power*1.7+e.def*1.1+e.aim*.35) : '잠김'}</div>
+      <div class="muted">${unlocked ? escapeHtml(e.style) : '정보가 없습니다.'}</div>
+      <button ${unlocked ? '' : 'disabled'}>${state.selectedEnemy===e.id ? '선택됨' : '상대 선택'}</button>
+    `;
+
+    div.querySelector('button').addEventListener('click',() => {
+      state.selectedEnemy = e.id;
+      renderEnemies();
+      renderBattleSelection();
+    });
+
+    list.appendChild(div);
+  });
+}
+
+function enemyScale(e) {
+  const defeated = Math.max(0,state.wins-Math.floor(e.unlock/3));
+  const scale = 1+Math.min(.55,defeated*.025);
+
+  return {
+    ...e,
+    maxHp:Math.round(e.hp*scale),
+    power:Math.round(e.power*scale),
+    def:Math.round(e.def*scale),
+    aim:Math.min(95,e.aim+Math.floor(defeated*.4))
+  };
+}
+
+function renderBattleSelection() {
+  const raw = enemies.find(e => e.id===state.selectedEnemy) || enemies[0];
+  const e = enemyScale(raw);
+
+  $('battleEnemyName').textContent =
+    state.fame>=raw.unlock ? raw.name : '[잠긴 상대]';
+
+  drawSprite($('battleEnemy'),{
+    hair:raw.color,
+    jacket:raw.color,
+    skin:raw.skin || '#d69b78',
+    eye:'#f6ed67',
+    chrome:raw.id==='adam' ? '#aab7c5' : '#42f5e9',
+    chromes:raw.id==='adam' ? ['dermal','gorilla','optics'] :
+      raw.id==='maelstrom' ? ['optics','neural'] : []
+  },true);
+
+  $('battleEnemyHp').style.width = '100%';
+  $('battleEnemyHpText').textContent = e.maxHp+' HP';
+  $('battlePlayerHp').style.width = (state.hp/state.maxHp*100)+'%';
+  $('battlePlayerHpText').textContent = state.hp+' HP';
+
+  const locked = state.fame < raw.unlock;
+  $('fightBtn').disabled = locked || state.hp<=0;
+
+  $('enemyDetails').innerHTML = locked
+    ? `<b class="pink">상대 정보 잠김</b><p>명성 ${raw.unlock} 이상 필요합니다.</p>`
+    : `
+      <b>${escapeHtml(raw.name)}</b>
+      <span class="pill">${escapeHtml(raw.faction)}</span>
+      <p class="muted">${escapeHtml(raw.style)}</p>
+      <div class="item"><span>상대 체력 / 화력 / 방어</span><b>${e.maxHp} / ${e.power} / ${e.def}</b></div>
+      <div class="item"><span>예상 보상</span><b class="yellow">${money(e.reward)} · 명성 +${e.fame}</b></div>
+      <div class="item"><span>내 전투력 / 상대 위협도</span><b>${calcPower()} / ${Math.round(e.power*1.7+e.def*1.1+e.aim*.35)}</b></div>
+    `;
+}
+
+function rand(min,max) {
+  return Math.random()*(max-min)+min;
+}
+
+// 자동 전투 시뮬레이션
+function simulateFight() {
+  const raw = enemies.find(e => e.id===state.selectedEnemy) || enemies[0];
+
+  if (state.fame < raw.unlock || state.hp<=0) return;
+
+  const e = enemyScale(raw);
+  const p = effectiveStats();
+
+  const playerPower = calcPower(p);
+  const enemyPower = Math.round(e.power*1.7+e.def*1.1+e.aim*.35);
+
+  let playerHP = state.hp;
+  let enemyHP = e.maxHp;
+  let lines = [];
+
+  lines.push(`// 전투 시작: ${state.name} vs ${e.name}`);
+  lines.push(`전투력: ${playerPower} 대 ${enemyPower}`);
+
+  let round = 0;
+  const maxRounds = 9;
+
+  while (playerHP>0 && enemyHP>0 && round<maxRounds) {
+    round++;
+
+    const playerFirst =
+      (p.speed+rand(-5,5)) >= (Math.max(5,e.power*.55)+rand(-4,4));
+
+    const order = playerFirst ? ['player','enemy'] : ['enemy','player'];
+
+    for (const who of order) {
+      if (playerHP<=0 || enemyHP<=0) break;
+
+      if (who==='player') {
+        const hit = Math.min(.96,Math.max(.35,(p.aim+40)/140));
+
+        if (Math.random()<hit) {
+          let dmg = Math.max(
+            2,
+            Math.round(
+              (p.power*rand(.75,1.25)+state.level*2)*(1+rand(0,.12))
+              -e.def*.48
+            )
+          );
+
+          const crit = Math.random()<Math.min(.45,p.crit/100);
+
+          if (crit) dmg = Math.round(dmg*1.65);
+          if (state.style==='assassin' && Math.random()<.18) dmg=Math.round(dmg*1.4);
+          if (state.style==='netrunner' && p.hack>12 && round===1) dmg+=Math.round(p.hack*.55);
+
+          enemyHP -= dmg;
+
+          lines.push(
+            `R${round} · ${crit?'치명타! ':''}${state.name}의 ${weaponById(state.weapon).type} 공격 → ${dmg} 피해`
+          );
+        } else {
+          lines.push(`R${round} · ${state.name}의 공격이 빗나갔습니다.`);
+        }
+      } else {
+        const enemyHit = Math.min(.9,Math.max(.28,e.aim/100));
+
+        if (Math.random()<enemyHit) {
+          let dmg = Math.max(2,Math.round(e.power*rand(.7,1.2)-p.def*.42));
+
+          if (state.style==='assassin' && Math.random()<.18) {
+            dmg = Math.round(dmg*.45);
+            lines.push(`R${round} · 회피 성공! 피해 감소`);
+          }
+
+          playerHP -= dmg;
+          lines.push(`R${round} · ${e.name}의 반격 → ${dmg} 피해`);
+        } else {
+          lines.push(`R${round} · 상대의 공격을 피했습니다.`);
+        }
+      }
+    }
+  }
+
+  let win = enemyHP<=0 && playerHP>0;
+
+  if (round>=maxRounds && enemyHP>0 && playerHP>0) {
+    win = playerHP/state.maxHp >= enemyHP/e.maxHp;
+  }
+
+  if (win) {
+    state.wins++;
+    state.streak++;
+    state.bestStreak = Math.max(state.bestStreak,state.streak);
+
+    const cash = Math.round(e.reward*rand(.85,1.15));
+
+    state.money += cash;
+    state.fame += e.fame;
+    state.xp += e.xp;
+
+    const damage = Math.max(0,state.hp-Math.max(1,Math.round(playerHP)));
+    state.hp = Math.max(1,Math.round(playerHP));
+
+    lines.push(`승리! ${money(cash)}, 명성 +${e.fame}, 경험치 +${e.xp}`);
+
+    if (damage) lines.push(`전투 피해: 체력 -${damage}`);
+
+    while (state.xp>=state.level*100) {
+      state.xp -= state.level*100;
+      state.level++;
+      state.maxHp += 8;
+      state.hp = Math.min(state.maxHp,state.hp+8);
+      state.stats.power += 2;
+      state.stats.def += 1;
+      state.stats.speed += 1;
+
+      lines.push(`레벨 업! Lv.${state.level} · 최대 체력 +8 · 능력치 상승`);
+    }
+
+    state.battleResult = '승리';
+    addActivity(`${e.name} 격파 — ${money(cash)} / 명성 +${e.fame}`);
+  } else {
+    state.losses++;
+    state.streak = 0;
+
+    const damage = Math.max(12,Math.round(state.maxHp*.18+e.power*.65));
+
+    state.hp = Math.max(0,Math.min(
+      state.hp,
+      Math.round(playerHP),
+      state.hp-damage
+    ));
+
+    lines.push(`패배… 후퇴 중 추가 부상으로 체력 -${damage}`);
+
+    state.battleResult = '패배';
+    addActivity(`${e.name}에게 패배 — 체력 -${damage}`);
+  }
+
+  state.battleCount++;
+
+  const record = {
+    enemy:e.name,
+    result:state.battleResult,
+    rounds:round,
+    when:new Date().toLocaleString('ko-KR'),
+    hp:state.hp
+  };
+
+  state.history.unshift(record);
+  state.history = state.history.slice(0,40);
+
+  $('battleLog').innerHTML = lines
+    .map(l => `<div>${escapeHtml(l)}</div>`)
+    .join('');
+
+  $('battleResult').innerHTML = `
+    <div class="result">
+      <b class="${win?'green':'pink'}">${win?'VICTORY // 승리':'DEFEAT // 패배'}</b>
+      <p>${win?'보상을 획득했습니다. 다음 상대에 도전하거나 장비를 정비하세요.':'체력이 감소했습니다. 치료 후 다시 도전하세요.'}</p>
+      <div class="muted">남은 체력: ${state.hp}/${state.maxHp} · 라운드: ${round}</div>
+    </div>
+  `;
+
+  updateUI();
+  renderBattleSelection();
+  saveGame(false);
+}
+
+$('fightBtn').addEventListener('click',simulateFight);
+
+$('healBtn').addEventListener('click',() => {
+  const cost = 250;
+
+  if (state.money<cost) return notify('에디가 부족합니다.');
+  if (state.hp>=state.maxHp) return notify('체력이 이미 가득 찼습니다.');
+
+  state.money -= cost;
+
+  const old = state.hp;
+  state.hp = Math.min(state.maxHp,state.hp+45);
+
+  notify(`응급 치료 완료: 체력 +${state.hp-old}`);
+  updateUI();
+});
+
+// 크롬 상점 및 장착 관리
+function renderChrome() {
+  const shop = $('chromeShop');
+  shop.innerHTML = '';
+
+  chromeCatalog.forEach(c => {
+    const own = state.chromes.includes(c.id);
+    const slotTaken = equipped().some(x => x.slot===c.slot);
+
+    const d = document.createElement('div');
+    d.className = 'item';
+
+    d.innerHTML = `
+      <div>
+        <b>${c.name}</b>
+        <span class="pill">${c.slot}</span>
+        <p>${c.desc}</p>
+        <p>인간성 -${c.humanity} · ${
+          Object.entries(c.stats).map(([k,v]) =>
+            `${({power:'화력',def:'방어',aim:'명중',speed:'반사신경',hack:'해킹',crit:'치명타',hp:'체력'}[k]||k)} +${v}`
+          ).join(' / ')
+        }</p>
+      </div>
+      <button ${own||state.money<c.cost||slotTaken?'disabled':''}>
+        ${own?'장착됨':slotTaken?'슬롯 사용 중':money(c.cost)}
+      </button>
+    `;
+
+    d.querySelector('button').addEventListener('click',() => buyChrome(c));
+    shop.appendChild(d);
+  });
+
+  const eq = $('equippedChrome');
+
+  if (!state.chromes.length) {
+    eq.innerHTML = '<p class="muted">장착한 크롬이 없습니다.</p>';
+    return;
+  }
+
+  eq.innerHTML = state.chromes.map(id => {
+    const c = chromeById(id);
+
+    return `
+      <div class="item">
+        <div><b>${c.name}</b><p>${c.slot} 슬롯 · 인간성 비용 ${c.humanity}</p></div>
+        <button data-remove="${id}">제거</button>
+      </div>
+    `;
+  }).join('');
+
+  eq.querySelectorAll('[data-remove]').forEach(b => {
+    b.addEventListener('click',() => {
+      const c = chromeById(b.dataset.remove);
+
+      state.chromes = state.chromes.filter(x => x!==c.id);
+
+      notify(c.name+' 제거됨. 인간성은 회복되지 않습니다.');
+      updateUI();
+    });
+  });
+}
+
+function buyChrome(c) {
+  if (state.money<c.cost) return notify('에디가 부족합니다.');
+  if (state.chromes.includes(c.id)) return;
+
+  if (equipped().some(x => x.slot===c.slot)) {
+    return notify(`${c.slot} 슬롯에 이미 크롬이 장착되어 있습니다. 먼저 제거하세요.`);
+  }
+
+  state.money -= c.cost;
+  state.chromes.push(c.id);
+  state.humanity = Math.max(0,state.humanity-c.humanity);
+
+  if (c.stats.hp) {
+    state.maxHp += c.stats.hp;
+    state.hp += c.stats.hp;
+  }
+
+  notify(`${c.name} 장착 완료. 인간성 -${c.humanity}%`);
+  addActivity(`${c.name} 장착 — 인간성 ${state.humanity}%`);
+
+  updateUI();
+}
+
+// 무기 상점
+function renderWeapons() {
+  const shop = $('weaponShop');
+  shop.innerHTML = '';
+
+  weaponCatalog.forEach(w => {
+    const owned = state.weapons.includes(w.id);
+    const selected = state.weapon===w.id;
+
+    const d = document.createElement('div');
+    d.className = 'item';
+
+    d.innerHTML = `
+      <div>
+        <b>${w.name}</b>
+        ${selected?'<span class="pill green">장착 중</span>':''}
+        <p>${w.desc}</p>
+        <p>${Object.entries(w.stats).map(([k,v]) =>
+          `${({power:'화력',def:'방어',aim:'명중',speed:'반사신경',hack:'해킹',crit:'치명타'}[k]||k)} ${v>0?'+':''}${v}`
+        ).join(' / ')}</p>
+      </div>
+      <button>${selected?'사용 중':owned?'장착':money(w.cost)}</button>
+    `;
+
+    d.querySelector('button').addEventListener('click',() => {
+      if (owned) {
+        state.weapon = w.id;
+        notify(w.name+' 장착');
+        updateUI();
+      } else if (state.money>=w.cost) {
+        state.money -= w.cost;
+        state.weapons.push(w.id);
+        state.weapon = w.id;
+
+        notify(w.name+' 구매 및 장착 완료');
+        addActivity(`${w.name} 구매`);
+        updateUI();
+      } else {
+        notify('에디가 부족합니다.');
+      }
+    });
+
+    shop.appendChild(d);
+  });
+
+  $('weaponInventory').innerHTML = state.weapons.map(id =>
+    `<div class="item"><span>${weaponById(id).name}</span><b class="${state.weapon===id?'green':''}">${state.weapon===id?'장착 중':'보유'}</b></div>`
+  ).join('');
+}
+
+// 회복 아이템
+$('buyMed').addEventListener('click',() => {
+  if (state.money<180) return notify('에디가 부족합니다.');
+
+  state.money -= 180;
+  state.hp = Math.min(state.maxHp,state.hp+35);
+
+  notify('바운스 백 사용: 체력 회복');
+  updateUI();
+});
+
+// 전투 기록
+function renderRecords() {
+  if (!state.history.length) {
+    $('historyList').textContent = '아직 전투 기록이 없습니다.';
+    return;
+  }
+
+  $('historyList').innerHTML = state.history.map(r => `
+    <div>
+      <b class="${r.result==='승리'?'green':'pink'}">${r.result}</b> — ${escapeHtml(r.enemy)}<br>
+      <span class="muted">${r.when} · ${r.rounds} 라운드 · 남은 체력 ${r.hp}</span>
+    </div>
+  `).join('');
+}
+
+$('clearHistory').addEventListener('click',() => {
+  state.history = [];
+  renderRecords();
+  notify('전투 기록을 지웠습니다.');
+});
+
+// 브라우저 저장
+function saveGame(show=true) {
+  try {
+    localStorage.setItem('mercenaryLabSave',JSON.stringify(state));
+
+    if (show) notify('진행 상황을 저장했습니다.');
+  } catch(e) {
+    if (show) notify('저장에 실패했습니다. 브라우저 저장 설정을 확인하세요.');
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('mercenaryLabSave');
+
+    if (raw) {
+      const loaded = JSON.parse(raw);
+
+      state = {
+        ...defaultState(),
+        ...loaded,
+        look:{...defaultState().look,...loaded.look},
+        stats:{...baseStats,...loaded.stats}
+      };
+
+      return true;
+    }
+  } catch(e) {}
+
+  return false;
+}
+
+$('saveBtn').addEventListener('click',() => saveGame());
+
+$('resetBtn').addEventListener('click',() => {
+  if (confirm('저장된 캐릭터와 진행 상황을 모두 초기화할까요?')) {
+    localStorage.removeItem('mercenaryLabSave');
+    state = defaultState();
+
+    syncInputs();
+    updateUI();
+
+    $('battleLog').innerHTML =
+      '<div class="muted">전투를 시작하면 전투 계산 결과가 이곳에 표시됩니다.</div>';
+
+    $('battleResult').innerHTML = '';
+
+    notify('새로운 용병으로 시작합니다.');
+  }
+});
+
+function syncInputs() {
+  $('nameInput').value = state.name;
+  $('styleInput').value = state.style;
+  $('hairInput').value = state.look.hair;
+  $('jacketInput').value = state.look.jacket;
+  $('skinInput').value = state.look.skin;
+  $('eyeInput').value = state.look.eye;
+}
+
+loadGame();
+syncInputs();
+updateUI();
+</script>
+</body>
+</html>
