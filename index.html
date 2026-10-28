@@ -321,35 +321,40 @@ const baseStats = {
   power:10,def:5,aim:60,speed:10,hack:5,crit:5,hp:100
 };
 
+
 const defaultState = () => ({
-  name:'V',
-  style:'solo',
-  look:{
-    hair:'#f6ed67',
-    jacket:'#ff3d81',
-    skin:'#d69b78',
-    eye:'#42f5e9'
+  name: 'V',
+  style: 'solo',
+
+  // 기본 캐릭터 외형
+  look: {
+    hair: '#292b29',
+    jacket: '#d8d1bd',
+    skin: '#e4d8c5',
+    eye: '#343832',
+    pants: '#aaa995'
   },
-  level:1,
-  xp:0,
-  hp:100,
-  maxHp:100,
-  humanity:100,
-  money:1500,
-  fame:0,
-  stats:{...baseStats},
-  weapons:['unity'],
-  weapon:'unity',
-  chromes:[],
-  wins:0,
-  losses:0,
-  streak:0,
-  bestStreak:0,
-  history:[],
-  activity:[],
-  medkits:0,
-  selectedEnemy:'thug',
-  battleCount:0
+
+  level: 1,
+  xp: 0,
+  hp: 100,
+  maxHp: 100,
+  humanity: 100,
+  money: 1500,
+  fame: 0,
+  stats: { ...baseStats },
+  weapons: ['unity'],
+  weapon: 'unity',
+  chromes: [],
+  wins: 0,
+  losses: 0,
+  streak: 0,
+  bestStreak: 0,
+  history: [],
+  activity: [],
+  medkits: 0,
+  selectedEnemy: 'thug',
+  battleCount: 0
 });
 
 let state = defaultState();
@@ -428,106 +433,115 @@ function calcPower(s = effectiveStats()) {
 
 // 픽셀 캐릭터 그리기
 function drawSprite(canvas, config = {}, enemy = false) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const ctx = canvas.getContext("2d");
+  const W = 40;
+  const H = 48;
+
+  ctx.clearRect(0, 0, W, H);
   ctx.imageSmoothingEnabled = false;
 
-  const px = (x,y,w,h,c) => {
-    ctx.fillStyle = c;
-    ctx.fillRect(x,y,w,h);
+  const px = (x, y, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
   };
 
-  const hair = config.hair || '#f6ed67';
-  const jacket = config.jacket || '#ff3d81';
-  const skin = config.skin || '#d69b78';
-  const eye = config.eye || '#42f5e9';
-  const dark = '#10141d';
-  const pants = '#303c50';
-  const chrome = enemy ? (config.chrome || '#7b8794') : '#b6c5d1';
+  // 기본 팔레트: 참고 이미지의 차분한 픽셀풍
+  const skin = config.skin || "#e4d8c5";
+  const hair = config.hair || "#292b29";
+  const jacket = config.jacket || "#d8d1bd";
+  const pants = config.pants || "#aaa995";
+  const shoes = "#55564d";
+  const shadow = "#b9ad9b";
+  const eye = config.eye || "#343832";
 
-  px(9,44,22,2,'#253040');
-  px(13,35,5,8,dark);
-  px(22,35,5,8,dark);
-  px(12,41,7,3,pants);
-  px(21,41,7,3,pants);
+  // 1. 머리 뒤쪽과 긴 머리카락
+  px(14, 5, 11, 12, hair);
+  px(13, 8, 3, 11, hair);
+  px(22, 9, 4, 13, hair);
+  px(14, 15, 3, 5, hair);
 
-  // 몸통과 재킷
-  px(11,21,18,15,jacket);
-  px(9,23,4,10,jacket);
-  px(27,23,4,10,jacket);
-  px(14,22,4,12,enemy ? chrome : dark);
-  px(22,22,4,12,dark);
-  px(18,24,4,8,skin);
+  // 2. 얼굴
+  px(16, 8, 7, 8, skin);
+  px(15, 10, 2, 5, skin);
+  px(17, 15, 5, 2, skin);
 
-  // 목과 얼굴
-  px(17,17,6,5,skin);
-  px(13,8,14,11,skin);
-  px(12,10,2,7,skin);
-  px(26,10,2,7,skin);
-  px(13,5,14,5,hair);
-  px(11,7,4,5,hair);
-  px(24,7,4,4,hair);
-  px(14,13,4,2,dark);
-  px(22,13,4,2,dark);
-  px(15,13,2,2,eye);
-  px(22,13,2,2,eye);
-  px(18,17,4,1,dark);
+  // 앞머리
+  px(15, 6, 9, 3, hair);
+  px(15, 8, 3, 5, hair);
+  px(20, 9, 2, 3, hair);
 
-  // 크롬에 따른 외형 변화
-  const chromeSet = config.chromes || [];
+  // 얼굴의 눈과 코
+  px(20, 11, 1, 1, eye);
+  px(22, 13, 1, 2, shadow);
 
-  if (chromeSet.some(c => ['optics','sandevistan'].includes(c))) {
-    px(22,13,2,2,'#fff');
-    px(24,14,2,1,eye);
-  }
+  // 3. 목
+  px(18, 16, 4, 3, skin);
 
-  if (chromeSet.some(c => ['gorilla','mantis','monowire'].includes(c))) {
-    px(9,25,4,9,chrome);
-    px(27,25,4,9,chrome);
+  // 4. 몸통: 기본 의상
+  // 어깨
+  px(14, 18, 12, 3, jacket);
+  // 상체
+  px(15, 20, 10, 8, jacket);
+  px(16, 28, 8, 2, jacket);
 
-    if (chromeSet.includes('mantis')) {
-      px(8,18,2,8,'#d9edf7');
-      px(30,18,2,8,'#d9edf7');
-    }
-  }
+  // 옷의 음영과 앞섶
+  px(14, 20, 2, 7, shadow);
+  px(23, 21, 2, 6, shadow);
+  px(19, 20, 1, 8, "#77786c");
 
-  if (chromeSet.some(c => ['dermal','subdermal'].includes(c))) {
-    px(12,26,3,6,chrome);
-    px(25,26,3,6,chrome);
-  }
+  // 5. 팔
+  // 왼팔
+  px(13, 20, 3, 7, jacket);
+  px(12, 26, 3, 5, skin);
+  px(11, 30, 3, 3, skin);
 
-  if (chromeSet.includes('cyberdeck')) {
-    px(26,20,4,3,'#42f5e9');
-  }
+  // 오른팔
+  px(25, 20, 3, 7, jacket);
+  px(26, 26, 3, 5, skin);
+  px(27, 30, 2, 3, skin);
 
-  if (chromeSet.includes('neural')) {
-    px(12,15,2,2,'#42f5e9');
-    px(26,15,2,2,'#42f5e9');
-  }
+  // 6. 바지
+  px(16, 29, 4, 7, pants);
+  px(21, 29, 4, 7, pants);
 
-  if (chromeSet.includes('wire')) {
-    px(30,28,2,8,'#42f5e9');
-  }
+  // 다리 자세를 서로 다르게 하여 픽셀 캐릭터 느낌 유지
+  px(16, 34, 3, 5, pants);
+  px(14, 38, 3, 5, pants);
+  px(22, 34, 3, 7, pants);
 
+  // 7. 신발
+  px(13, 42, 4, 2, shoes);
+  px(21, 41, 4, 2, shoes);
+
+  // 8. 옷의 포인트
   if (enemy) {
-    px(13,22,14,2,config.accent || '#f6ed67');
+    // 적은 실루엣을 유지하면서 소속별 포인트를 표시
+    px(16, 22, 8, 2, config.accent || "#b85c4b");
+  } else {
+    // 플레이어 재킷의 작은 디테일
+    px(22, 22, 1, 2, "#e7dfca");
   }
-}
 
-function playerLook() {
-  return {...state.look,chromes:state.chromes};
-}
+  // 9. 장착한 크롬을 외형에 반영
+  const chromes = config.chromes || [];
 
-function drawAll() {
-  drawSprite($('spriteMain'),playerLook());
-  drawSprite($('spriteEditor'),playerLook());
-  drawSprite($('battlePlayer'),playerLook());
+  if (chromes.includes("optics")) {
+    px(20, 11, 2, 1, "#70c9bd");
+  }
 
-  $('spriteName').textContent = state.name;
-  $('editorName').textContent = state.name;
-  $('spriteStyle').textContent =
-    styleNames[state.style].toUpperCase() + ' // NIGHT CITY';
-  $('battlePlayerName').textContent = state.name;
+  if (chromes.includes("gorilla")) {
+    px(11, 26, 4, 5, "#8b9694");
+    px(26, 26, 4, 5, "#8b9694");
+  }
+
+  if (chromes.includes("mantis")) {
+    px(10, 19, 1, 8, "#aab8b2");
+    px(29, 19, 1, 8, "#aab8b2");
+  }
+
+  if (chromes.includes("monowire")) {
+    px(29, 28, 1, 8, "#70c9bd");
+  }
 }
 
 function updateStatsEditor() {
